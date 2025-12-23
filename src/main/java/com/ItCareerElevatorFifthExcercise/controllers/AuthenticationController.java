@@ -33,6 +33,7 @@ public class AuthenticationController {
         log.info("---> POST request on api/auth/register with username: {}.", userRequest.getUsername());
 
         var responseDTO = userService.register(userRequest);
+        // TODO: Send to a kafka topic an email to the user that the registration is successful
 
         return ResponseEntity.created(null).body(responseDTO); // TODO: URL
     }
@@ -59,7 +60,7 @@ public class AuthenticationController {
 
     @PostMapping("/assign-roles")
     public ResponseEntity<String> assignRolesToUser(@Valid @RequestBody AssignRolesRequestDTO requestDTO) {
-        log.info("---> POST request on api/auth/assign-roles with username: {}.", requestDTO.getUsername());
+        log.info("---> POST request on api/auth/assign-roles for user with username: {}.", requestDTO.getUsername());
 
         userService.assignRolesToUser(requestDTO);
 

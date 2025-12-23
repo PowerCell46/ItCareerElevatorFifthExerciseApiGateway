@@ -46,11 +46,11 @@ public class UserServiceImpl implements UserService {
             @Lazy AuthenticationManager authenticationManager,
             PasswordEncoder encoder, UserRepository userRepository
     ) {
+        this.encoder = encoder;
         this.jwtUtils = jwtUtils;
         this.roleService = roleService;
-        this.authenticationManager = authenticationManager;
-        this.encoder = encoder;
         this.userRepository = userRepository;
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
@@ -166,8 +166,10 @@ public class UserServiceImpl implements UserService {
             user.setEmail(userRequest.getEmail());
         }
 
-        if (userRequest.getPassword() != null)
+        if (userRequest.getPassword() != null) {
+            // ? Normally this would happen by a link sent to the email for resetting password
             user.setPassword(encodeUserPassword(userRequest.getPassword()));
+        }
 
         if (userRequest.getUsername() != null || userRequest.getEmail() != null || userRequest.getPassword() != null) {
             log.info("Updating user {}.", user.getUsername());

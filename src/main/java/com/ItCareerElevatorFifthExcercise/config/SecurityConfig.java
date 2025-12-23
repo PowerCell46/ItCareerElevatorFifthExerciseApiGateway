@@ -22,10 +22,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private final JsonAccessDeniedHandler jsonAccessDeniedHandler;
     private final JwtRequestFilter jwtRequestFilter;
 
-    public SecurityConfig(@Lazy JwtRequestFilter jwtRequestFilter) {
+    public SecurityConfig(
+            @Lazy JwtRequestFilter jwtRequestFilter,
+            JsonAccessDeniedHandler jsonAccessDeniedHandler
+    ) {
         this.jwtRequestFilter = jwtRequestFilter;
+        this.jsonAccessDeniedHandler = jsonAccessDeniedHandler;
     }
 
     @Bean
@@ -43,23 +48,23 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/register",
-                                "/api/auth/login"
-                        ).permitAll() // ! Also have to be added in JwtRequestFilter -> PUBLIC_ENDPOINTS
-                        .requestMatchers(
-                                "/api/auth/assign-roles"
-                        ).hasRole("ADMIN") // expects "ROLE_ADMIN"
+                                .requestMatchers(
+                                        "/api/auth/register",
+                                        "/api/auth/login"
+                                ).permitAll() // ! Also have to be added in JwtRequestFilter -> PUBLIC_ENDPOINTS
+                                .requestMatchers(
+                                        "/api/auth/assign-roles"
+                                ).hasRole("ADMIN") // expects "ROLE_ADMIN"
 //                        .requestMatchers(
 //                                "/api/manage/**"
 //                        ).hasAnyRole("MANAGER", "ADMIN") // expects ROLE_MANAGER or ROLE_ADMIN
-                        .anyRequest().authenticated()
+                                .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .exceptionHandling(ex ->
-                        ex.accessDeniedHandler(new JsonAccessDeniedHandler())
+                        ex.accessDeniedHandler(jsonAccessDeniedHandler)
                 );
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
