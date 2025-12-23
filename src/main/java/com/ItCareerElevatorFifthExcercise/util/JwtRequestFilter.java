@@ -1,0 +1,117 @@
+package com.ItCareerElevatorFifthExcercise.util;
+
+import com.ItCareerElevatorFifthExcercise.DTOs.common.ErrorResponseDTO;
+import com.ItCareerElevatorFifthExcercise.services.interfaces.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.security.SignatureException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+@Component
+@RequiredArgsConstructor
+public class JwtRequestFilter extends OncePerRequestFilter {
+
+    private final ObjectMapper objectMapper;
+
+    private final JwtUtils jwtUtils;
+    private final UserService userService;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain fChain) throws ServletException, IOException {
+        boolean isEndpointPublic = isPathPublic(req.getRequestURI());
+
+        final String header = req.getHeader("Authorization");
+        String username = null;
+        String token = null;
+
+        if (header != null && header.startsWith("Bearer ")) {
+            token = header.substring(7);
+
+            try {
+                username = jwtUtils.extractUsername(token);
+
+            } catch (SignatureException ex) {
+                writeJsonErrorResponse(res, "Invalid token signature.");
+                return;
+
+            } catch (ExpiredJwtException ex) {
+                writeJsonErrorResponse(res, "Token has expired.");
+                return;
+
+            } catch (JwtException ex) {
+                writeJsonErrorResponse(res, "Invalid token.");
+                return;
+            }
+
+        } else if (!isEndpointPublic) {
+            writeJsonErrorResponse(res, "Missing or malformed Authorization header.");
+            return;
+        }
+
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userService.loadUserByUsername(username);
+
+            if (jwtUtils.validateToken(token, userDetails)) {
+                var authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            } else if (!isEndpointPublic) {
+                writeJsonErrorResponse(res, "Invalid token.");
+                return;
+            }
+        }
+
+        fChain.doFilter(req, res);
+    }
+
+    private boolean isPathPublic(String path) {
+        if (
+            // @formatter:off
+                path.equals("/api/auth/register") ||
+                path.equals("/api/auth/login") ||
+                path.equals("/api/products")
+            // @formatter:on
+        ) {
+            return true;
+        }
+
+        if (path.startsWith("/api/products/") && !path.startsWith("/api/products/manage")) { // * /api/products/*
+            return true;
+        }
+
+        return false;
+    }
+
+    private void writeJsonErrorResponse(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                message,
+                System.currentTimeMillis()
+        );
+
+        objectMapper.writeValue(response.getWriter(), errorResponse);
+    }
+}
