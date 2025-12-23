@@ -20,6 +20,9 @@ public class DatabaseLoader implements CommandLineRunner {
     @Value("${admin.username}")
     private String ADMIN_USERNAME;
 
+    @Value("${admin.email}")
+    private String ADMIN_EMAIL;
+
     @Value("${admin.password}")
     private String ADMIN_PASSWORD;
 
@@ -37,7 +40,7 @@ public class DatabaseLoader implements CommandLineRunner {
                     .findByName(ROLE_ADMIN_NAME)
                     .orElse(roleRepository.save(new Role(ROLE_ADMIN_NAME)));
 
-            User adminUser = new User(ADMIN_USERNAME, ADMIN_PASSWORD, Set.of(roleAdmin));
+            User adminUser = new User(ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD, Set.of(roleAdmin));
             userRepository.save(adminUser);
 
         } else {

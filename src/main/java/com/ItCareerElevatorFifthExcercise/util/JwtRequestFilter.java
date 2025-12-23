@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -84,21 +85,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private boolean isPathPublic(String path) {
-        if (
-            // @formatter:off
-                path.equals("/api/auth/register") ||
-                path.equals("/api/auth/login") ||
-                path.equals("/api/products")
-            // @formatter:on
-        ) {
-            return true;
-        }
+        Set<String> PUBLIC_ENDPOINTS = Set.of("/api/auth/register", "/api/auth/login");
 
-        if (path.startsWith("/api/products/") && !path.startsWith("/api/products/manage")) { // * /api/products/*
-            return true;
-        }
-
-        return false;
+        return PUBLIC_ENDPOINTS.contains(path);
     }
 
     private void writeJsonErrorResponse(HttpServletResponse response, String message) throws IOException {

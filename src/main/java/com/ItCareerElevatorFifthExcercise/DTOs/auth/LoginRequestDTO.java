@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class AuthRequestDTO {
+public class LoginRequestDTO {
 
     @NotNull(message = "Username is required.")
     @Pattern(

@@ -1,7 +1,8 @@
 package com.ItCareerElevatorFifthExcercise.controllers;
 
 import com.ItCareerElevatorFifthExcercise.DTOs.auth.AssignRolesRequestDTO;
-import com.ItCareerElevatorFifthExcercise.DTOs.auth.AuthRequestDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.LoginRequestDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.RegisterRequestDTO;
 import com.ItCareerElevatorFifthExcercise.DTOs.auth.AuthResponseDTO;
 import com.ItCareerElevatorFifthExcercise.services.interfaces.UserService;
 import jakarta.validation.Valid;
@@ -24,7 +25,7 @@ public class AuthenticationController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody AuthRequestDTO userRequest) {
+    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody RegisterRequestDTO userRequest) {
         log.info("---> POST request on api/auth/register with username: {}.", userRequest.getUsername());
 
         var responseDTO = userService.register(userRequest);
@@ -33,7 +34,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> loginUser(@Valid @RequestBody AuthRequestDTO userRequest) {
+    public ResponseEntity<AuthResponseDTO> loginUser(@Valid @RequestBody LoginRequestDTO userRequest) {
         log.info("---> POST request on api/auth/login with username: {}.", userRequest.getUsername());
 
         var responseDTO = userService

@@ -34,6 +34,9 @@ public class User extends CommonEntity {
     private String username;
 
     @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -44,10 +47,11 @@ public class User extends CommonEntity {
     )
     private Set<Role> roles;
 
-    public User(String username, String password) {
+    public User(String username, String email, String password) {
         super();
 
         this.username = username;
+        this.email = email;
         this.password = password;
         this.roles = new HashSet<>();
     }

@@ -1,6 +1,7 @@
 package com.ItCareerElevatorFifthExcercise.controllers;
 
 import com.ItCareerElevatorFifthExcercise.DTOs.common.ErrorResponseDTO;
+import com.ItCareerElevatorFifthExcercise.exceptions.EmailIsAlreadyTakenException;
 import com.ItCareerElevatorFifthExcercise.exceptions.InvalidCredentialsException;
 import com.ItCareerElevatorFifthExcercise.exceptions.NoSuchRoleException;
 import com.ItCareerElevatorFifthExcercise.exceptions.NoSuchUserException;
@@ -30,6 +31,21 @@ public class ExceptionHandlerController {
         ErrorResponseDTO error = new ErrorResponseDTO(
                 HttpStatus.BAD_REQUEST.value(),
                 "Invalid username or password.", // ! Don't tell the user explicitly that the username is already taken.
+                System.currentTimeMillis()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST.value())
+                .body(error);
+    }
+
+    @ExceptionHandler(EmailIsAlreadyTakenException.class)
+    public ResponseEntity<ErrorResponseDTO> handleEmailIsAlreadyTakenException(EmailIsAlreadyTakenException ex) {
+        log.warn("Handling EmailIsAlreadyTakenException.");
+
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
                 System.currentTimeMillis()
         );
 

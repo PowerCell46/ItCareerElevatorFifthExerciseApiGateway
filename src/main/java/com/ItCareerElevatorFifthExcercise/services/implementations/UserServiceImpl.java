@@ -1,10 +1,11 @@
 package com.ItCareerElevatorFifthExcercise.services.implementations;
 
 import com.ItCareerElevatorFifthExcercise.DTOs.auth.AssignRolesRequestDTO;
-import com.ItCareerElevatorFifthExcercise.DTOs.auth.AuthRequestDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.RegisterRequestDTO;
 import com.ItCareerElevatorFifthExcercise.DTOs.auth.AuthResponseDTO;
 import com.ItCareerElevatorFifthExcercise.entities.Role;
 import com.ItCareerElevatorFifthExcercise.entities.User;
+import com.ItCareerElevatorFifthExcercise.exceptions.EmailIsAlreadyTakenException;
 import com.ItCareerElevatorFifthExcercise.exceptions.InvalidCredentialsException;
 import com.ItCareerElevatorFifthExcercise.exceptions.NoSuchUserException;
 import com.ItCareerElevatorFifthExcercise.exceptions.UserAlreadyExistsException;
@@ -52,10 +53,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AuthResponseDTO register(AuthRequestDTO userRequest) { // ? Cache the users in Redis? (API gateway has to be as FAST as possible!)
+    public AuthResponseDTO register(RegisterRequestDTO userRequest) { // ? Cache the users in Redis? (API gateway has to be as FAST as possible!)
         if (findByUsername(userRequest.getUsername()).isPresent()) {
             throw new UserAlreadyExistsException(
                     String.format("User with username %s already exists.", userRequest.getUsername())
+            );
+        }
+
+        if (findByEmail(userRequest.getEmail()).isPresent()) {
+            throw new EmailIsAlreadyTakenException(
+                    String.format("Email %s is already taken.", userRequest.getEmail())
             );
         }
 
@@ -65,10 +72,10 @@ public class UserServiceImpl implements UserService {
         return authenticate(user.getUsername(), userRequest.getPassword());
     }
 
-    private User constructNonPersistedUser(AuthRequestDTO userRequest) {
+    private User constructNonPersistedUser(RegisterRequestDTO userRequest) {
         String encodedPassword = encoder.encode(userRequest.getPassword());
 
-        return new User(userRequest.getUsername(), encodedPassword);
+        return new User(userRequest.getUsername(), userRequest.getEmail(), encodedPassword);
     }
 
     @Override
@@ -109,6 +116,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     @Override
