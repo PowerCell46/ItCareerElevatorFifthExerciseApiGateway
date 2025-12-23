@@ -37,6 +37,9 @@ public class DatabaseLoader implements CommandLineRunner {
 
             User adminUser = new User(ADMIN_USERNAME, ADMIN_PASSWORD, Set.of(roleAdmin));
             userRepository.save(adminUser);
+
+        } else {
+            log.info("User admin is already initialized.");
         }
     }
 
