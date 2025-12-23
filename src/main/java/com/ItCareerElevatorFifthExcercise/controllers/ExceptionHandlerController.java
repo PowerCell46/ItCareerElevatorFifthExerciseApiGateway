@@ -5,7 +5,7 @@ import com.ItCareerElevatorFifthExcercise.exceptions.EmailIsAlreadyTakenExceptio
 import com.ItCareerElevatorFifthExcercise.exceptions.InvalidCredentialsException;
 import com.ItCareerElevatorFifthExcercise.exceptions.NoSuchRoleException;
 import com.ItCareerElevatorFifthExcercise.exceptions.NoSuchUserException;
-import com.ItCareerElevatorFifthExcercise.exceptions.UserAlreadyExistsException;
+import com.ItCareerElevatorFifthExcercise.exceptions.UsernameIsAlreadyTakenException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.validation.ConstraintViolation;
@@ -24,13 +24,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class ExceptionHandlerController {
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponseDTO> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
-        log.warn("Handling UserAlreadyExistsException.");
+    @ExceptionHandler(UsernameIsAlreadyTakenException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUserAlreadyExistsException(UsernameIsAlreadyTakenException ex) {
+        log.warn("Handling UsernameIsAlreadyTakenException.");
 
         ErrorResponseDTO error = new ErrorResponseDTO(
                 HttpStatus.BAD_REQUEST.value(),
-                "Invalid username or password.", // ! Don't tell the user explicitly that the username is already taken.
+                "Invalid username or password.", // ! Don't tell the user explicitly
                 System.currentTimeMillis()
         );
 

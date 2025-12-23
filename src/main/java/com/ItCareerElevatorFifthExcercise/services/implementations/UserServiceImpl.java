@@ -10,7 +10,7 @@ import com.ItCareerElevatorFifthExcercise.entities.User;
 import com.ItCareerElevatorFifthExcercise.exceptions.EmailIsAlreadyTakenException;
 import com.ItCareerElevatorFifthExcercise.exceptions.InvalidCredentialsException;
 import com.ItCareerElevatorFifthExcercise.exceptions.NoSuchUserException;
-import com.ItCareerElevatorFifthExcercise.exceptions.UserAlreadyExistsException;
+import com.ItCareerElevatorFifthExcercise.exceptions.UsernameIsAlreadyTakenException;
 import com.ItCareerElevatorFifthExcercise.repositories.UserRepository;
 import com.ItCareerElevatorFifthExcercise.services.interfaces.RoleService;
 import com.ItCareerElevatorFifthExcercise.services.interfaces.UserService;
@@ -69,7 +69,7 @@ public class UserServiceImpl implements UserService {
 
     private void validateRegisterData(RegisterRequestDTO userRequest) {
         if (findByUsername(userRequest.getUsername()).isPresent()) {
-            throw new UserAlreadyExistsException(
+            throw new UsernameIsAlreadyTakenException(
                     String.format("User with username %s already exists.", userRequest.getUsername())
             );
         }
@@ -151,7 +151,7 @@ public class UserServiceImpl implements UserService {
     public PatchUserResponseDTO update(User user, PatchUserRequestDTO userRequest) {
         if (userRequest.getUsername() != null) {
             if (userRepository.findByUsername(userRequest.getUsername()).isPresent()) {
-                throw new UserAlreadyExistsException(
+                throw new UsernameIsAlreadyTakenException(
                         String.format("User with username %s already exists.", userRequest.getUsername())
                 );
             }
@@ -169,8 +169,10 @@ public class UserServiceImpl implements UserService {
         if (userRequest.getPassword() != null)
             user.setPassword(encodeUserPassword(userRequest.getPassword()));
 
-        if (userRequest.getUsername() != null || userRequest.getEmail() != null || userRequest.getPassword() != null)
+        if (userRequest.getUsername() != null || userRequest.getEmail() != null || userRequest.getPassword() != null) {
+            log.info("Updating user {}.", user.getUsername());
             save(user);
+        }
 
         return new PatchUserResponseDTO(user.getUsername(), user.getEmail());
     }
