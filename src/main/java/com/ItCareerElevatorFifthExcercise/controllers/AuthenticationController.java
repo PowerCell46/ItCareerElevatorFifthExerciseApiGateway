@@ -1,15 +1,19 @@
 package com.ItCareerElevatorFifthExcercise.controllers;
 
-import com.ItCareerElevatorFifthExcercise.DTOs.auth.AssignRolesRequestDTO;
-import com.ItCareerElevatorFifthExcercise.DTOs.auth.LoginRequestDTO;
-import com.ItCareerElevatorFifthExcercise.DTOs.auth.RegisterRequestDTO;
-import com.ItCareerElevatorFifthExcercise.DTOs.auth.AuthResponseDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.request.AssignRolesRequestDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.request.LoginRequestDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.request.PatchUserRequestDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.request.RegisterRequestDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.response.AuthResponseDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.response.PatchUserResponseDTO;
+import com.ItCareerElevatorFifthExcercise.entities.User;
 import com.ItCareerElevatorFifthExcercise.services.interfaces.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +43,16 @@ public class AuthenticationController {
 
         var responseDTO = userService
                 .authenticate(userRequest.getUsername(), userRequest.getPassword());
+
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    @PatchMapping("/profile")
+    public ResponseEntity<PatchUserResponseDTO> updateUser(@Valid @RequestBody PatchUserRequestDTO userRequest) {
+        User loggedUser = userService.getCurrentlyLoggedUser();
+        log.info("---> PATCH request on api/auth/profile for user {}.", loggedUser.getUsername());
+
+        var responseDTO = userService.update(loggedUser, userRequest);
 
         return ResponseEntity.ok(responseDTO);
     }

@@ -1,4 +1,4 @@
-package com.ItCareerElevatorFifthExcercise.DTOs.auth;
+package com.ItCareerElevatorFifthExcercise.DTOs.auth.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

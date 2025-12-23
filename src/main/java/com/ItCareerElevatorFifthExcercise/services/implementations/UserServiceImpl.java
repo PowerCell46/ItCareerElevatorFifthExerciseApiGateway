@@ -1,8 +1,10 @@
 package com.ItCareerElevatorFifthExcercise.services.implementations;
 
-import com.ItCareerElevatorFifthExcercise.DTOs.auth.AssignRolesRequestDTO;
-import com.ItCareerElevatorFifthExcercise.DTOs.auth.RegisterRequestDTO;
-import com.ItCareerElevatorFifthExcercise.DTOs.auth.AuthResponseDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.request.AssignRolesRequestDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.request.PatchUserRequestDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.request.RegisterRequestDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.response.AuthResponseDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.response.PatchUserResponseDTO;
 import com.ItCareerElevatorFifthExcercise.entities.Role;
 import com.ItCareerElevatorFifthExcercise.entities.User;
 import com.ItCareerElevatorFifthExcercise.exceptions.EmailIsAlreadyTakenException;
@@ -40,20 +42,32 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
 
     public UserServiceImpl(
-            JwtUtils jwtUtils,
+            JwtUtils jwtUtils, RoleService roleService,
             @Lazy AuthenticationManager authenticationManager,
-            PasswordEncoder encoder, UserRepository userRepository,
-            RoleService roleService
+            PasswordEncoder encoder, UserRepository userRepository
     ) {
         this.jwtUtils = jwtUtils;
+        this.roleService = roleService;
         this.authenticationManager = authenticationManager;
         this.encoder = encoder;
         this.userRepository = userRepository;
-        this.roleService = roleService;
     }
 
     @Override
     public AuthResponseDTO register(RegisterRequestDTO userRequest) { // ? Cache the users in Redis? (API gateway has to be as FAST as possible!)
+        validateRegisterData(userRequest);
+
+        User user = new User(
+                userRequest.getUsername(),
+                userRequest.getEmail(),
+                encodeUserPassword(userRequest.getPassword())
+        );
+        user = save(user);
+
+        return authenticate(user.getUsername(), userRequest.getPassword());
+    }
+
+    private void validateRegisterData(RegisterRequestDTO userRequest) {
         if (findByUsername(userRequest.getUsername()).isPresent()) {
             throw new UserAlreadyExistsException(
                     String.format("User with username %s already exists.", userRequest.getUsername())
@@ -65,17 +79,10 @@ public class UserServiceImpl implements UserService {
                     String.format("Email %s is already taken.", userRequest.getEmail())
             );
         }
-
-        User user = constructNonPersistedUser(userRequest);
-        user = save(user);
-
-        return authenticate(user.getUsername(), userRequest.getPassword());
     }
 
-    private User constructNonPersistedUser(RegisterRequestDTO userRequest) {
-        String encodedPassword = encoder.encode(userRequest.getPassword());
-
-        return new User(userRequest.getUsername(), userRequest.getEmail(), encodedPassword);
+    private String encodeUserPassword(String password) {
+        return encoder.encode(password);
     }
 
     @Override
@@ -113,18 +120,15 @@ public class UserServiceImpl implements UserService {
         throw new IllegalStateException("No authenticated user."); // Practically this would never happen
     }
 
-    @Override
-    public Optional<User> findByUsername(String username) {
+    private Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
-    @Override
-    public Optional<User> findByEmail(String email) {
+    private Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    @Override
-    public User getByUsername(String username) {
+    private User getByUsername(String username) {
         return findByUsername(username)
                 .orElseThrow(() -> new NoSuchUserException(String.format("No user found with username %s.", username)));
     }
@@ -144,9 +148,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public PatchUserResponseDTO update(User user, PatchUserRequestDTO userRequest) {
+        if (userRequest.getUsername() != null) {
+            if (userRepository.findByUsername(userRequest.getUsername()).isPresent()) {
+                throw new UserAlreadyExistsException(
+                        String.format("User with username %s already exists.", userRequest.getUsername())
+                );
+            }
+            user.setUsername(userRequest.getUsername());
+        }
+
+        if (userRequest.getEmail() != null) {
+            if (userRepository.findByEmail(userRequest.getEmail()).isPresent()) {
+                throw new EmailIsAlreadyTakenException(
+                        String.format("Email %s is already taken.", userRequest.getEmail()));
+            }
+            user.setEmail(userRequest.getEmail());
+        }
+
+        if (userRequest.getPassword() != null)
+            user.setPassword(encodeUserPassword(userRequest.getPassword()));
+
+        if (userRequest.getUsername() != null || userRequest.getEmail() != null || userRequest.getPassword() != null)
+            save(user);
+
+        return new PatchUserResponseDTO(user.getUsername(), user.getEmail());
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User is not found."));
+        User user = getByUsername(username);
 
         return new CustomUserDetails(user);
     }

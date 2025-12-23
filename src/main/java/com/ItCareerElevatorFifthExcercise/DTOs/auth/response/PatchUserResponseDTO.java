@@ -1,4 +1,4 @@
-package com.ItCareerElevatorFifthExcercise.DTOs.auth;
+package com.ItCareerElevatorFifthExcercise.DTOs.auth.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,9 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class AuthResponseDTO {
+public class PatchUserResponseDTO {
 
     private String username;
 
-    private String token;
+    private String email;
 }
