@@ -23,6 +23,8 @@ public class DatabaseLoader implements CommandLineRunner {
     @Value("${admin.password}")
     private String ADMIN_PASSWORD;
 
+    private static final String ROLE_ADMIN_NAME = "ROLE_ADMIN";
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
@@ -32,8 +34,8 @@ public class DatabaseLoader implements CommandLineRunner {
             log.info("Initializing the admin user.");
 
             Role roleAdmin = roleRepository
-                    .findByName("ADMIN")
-                    .orElse(roleRepository.save(new Role("ADMIN")));
+                    .findByName(ROLE_ADMIN_NAME)
+                    .orElse(roleRepository.save(new Role(ROLE_ADMIN_NAME)));
 
             User adminUser = new User(ADMIN_USERNAME, ADMIN_PASSWORD, Set.of(roleAdmin));
             userRepository.save(adminUser);
@@ -41,11 +43,25 @@ public class DatabaseLoader implements CommandLineRunner {
         } else {
             log.info("User admin is already initialized.");
         }
+
+        seedRoles();
     }
 
     private boolean isAdminMissing() {
         return userRepository
                 .findByUsername(ADMIN_USERNAME)
                 .isEmpty();
+    }
+
+    private void seedRoles() {
+        if (roleRepository.findByName("ROLE_MANAGER").isEmpty()) {
+            roleRepository.save(new Role("ROLE_MANAGER"));
+        }
+        if (roleRepository.findByName("ROLE_MODERATOR").isEmpty()) {
+            roleRepository.save(new Role("ROLE_MODERATOR"));
+        }
+        if (roleRepository.findByName("ROLE_SUPPORT").isEmpty()) {
+            roleRepository.save(new Role("ROLE_SUPPORT"));
+        }
     }
 }

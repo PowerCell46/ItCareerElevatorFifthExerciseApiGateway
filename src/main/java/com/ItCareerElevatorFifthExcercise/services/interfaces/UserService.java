@@ -1,5 +1,6 @@
 package com.ItCareerElevatorFifthExcercise.services.interfaces;
 
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.AssignRolesRequestDTO;
 import com.ItCareerElevatorFifthExcercise.DTOs.auth.AuthRequestDTO;
 import com.ItCareerElevatorFifthExcercise.DTOs.auth.AuthResponseDTO;
 import com.ItCareerElevatorFifthExcercise.entities.User;
@@ -18,4 +19,8 @@ public interface UserService extends UserDetailsService {
     User getCurrentlyLoggedUser();
 
     Optional<User> findByUsername(String username);
+
+    User getByUsername(String username);
+
+    void assignRolesToUser(AssignRolesRequestDTO requestDTO);
 }

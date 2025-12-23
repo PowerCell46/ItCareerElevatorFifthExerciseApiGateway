@@ -1,5 +1,6 @@
 package com.ItCareerElevatorFifthExcercise.controllers;
 
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.AssignRolesRequestDTO;
 import com.ItCareerElevatorFifthExcercise.DTOs.auth.AuthRequestDTO;
 import com.ItCareerElevatorFifthExcercise.DTOs.auth.AuthResponseDTO;
 import com.ItCareerElevatorFifthExcercise.services.interfaces.UserService;
@@ -39,5 +40,14 @@ public class AuthenticationController {
                 .authenticate(userRequest.getUsername(), userRequest.getPassword());
 
         return ResponseEntity.ok(responseDTO);
+    }
+
+    @PostMapping("/assign-roles")
+    public ResponseEntity<String> assignRolesToUser(@Valid @RequestBody AssignRolesRequestDTO requestDTO) {
+        log.info("---> POST request on api/auth/assign-roles with username: {}.", requestDTO.getUsername());
+
+        userService.assignRolesToUser(requestDTO);
+
+        return ResponseEntity.ok(String.format("Successful roles assignment to user %s.", requestDTO.getUsername()));
     }
 }

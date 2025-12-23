@@ -1,11 +1,15 @@
 package com.ItCareerElevatorFifthExcercise.services.implementations;
 
+import com.ItCareerElevatorFifthExcercise.DTOs.auth.AssignRolesRequestDTO;
 import com.ItCareerElevatorFifthExcercise.DTOs.auth.AuthRequestDTO;
 import com.ItCareerElevatorFifthExcercise.DTOs.auth.AuthResponseDTO;
+import com.ItCareerElevatorFifthExcercise.entities.Role;
 import com.ItCareerElevatorFifthExcercise.entities.User;
 import com.ItCareerElevatorFifthExcercise.exceptions.InvalidCredentialsException;
+import com.ItCareerElevatorFifthExcercise.exceptions.NoSuchUserException;
 import com.ItCareerElevatorFifthExcercise.exceptions.UserAlreadyExistsException;
 import com.ItCareerElevatorFifthExcercise.repositories.UserRepository;
+import com.ItCareerElevatorFifthExcercise.services.interfaces.RoleService;
 import com.ItCareerElevatorFifthExcercise.services.interfaces.UserService;
 import com.ItCareerElevatorFifthExcercise.util.CustomUserDetails;
 import com.ItCareerElevatorFifthExcercise.util.JwtUtils;
@@ -30,18 +34,21 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private final JwtUtils jwtUtils;
-    private final AuthenticationManager authenticationManager;
+    private final RoleService roleService;
     private final PasswordEncoder encoder;
+    private final AuthenticationManager authenticationManager;
 
     public UserServiceImpl(
             JwtUtils jwtUtils,
             @Lazy AuthenticationManager authenticationManager,
-            PasswordEncoder encoder, UserRepository userRepository
+            PasswordEncoder encoder, UserRepository userRepository,
+            RoleService roleService
     ) {
         this.jwtUtils = jwtUtils;
         this.authenticationManager = authenticationManager;
         this.encoder = encoder;
         this.userRepository = userRepository;
+        this.roleService = roleService;
     }
 
     @Override
@@ -102,6 +109,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    @Override
+    public User getByUsername(String username) {
+        return findByUsername(username)
+                .orElseThrow(() -> new NoSuchUserException(String.format("No user found with username %s.", username)));
+    }
+
+    @Override
+    public void assignRolesToUser(AssignRolesRequestDTO requestDTO) {
+        User user = getByUsername(requestDTO.getUsername());
+
+        requestDTO
+                .getRoles()
+                .forEach(roleName -> {
+                    Role role = roleService.getByName(roleName);
+                    user.getRoles().add(role);
+                });
+
+        save(user);
     }
 
     @Override
