@@ -16,6 +16,8 @@ public interface UserService extends UserDetailsService {
 
     AuthResponseDTO authenticate(String username, String password);
 
+    User getByUsername(String username);
+
     User getCurrentlyLoggedUser();
 
     void assignRolesToUser(AssignRolesRequestDTO requestDTO);

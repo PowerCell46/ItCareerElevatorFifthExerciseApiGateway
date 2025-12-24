@@ -128,7 +128,8 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email);
     }
 
-    private User getByUsername(String username) {
+    @Override
+    public User getByUsername(String username) {
         return findByUsername(username)
                 .orElseThrow(() -> new NoSuchUserException(String.format("No user found with username %s.", username)));
     }
