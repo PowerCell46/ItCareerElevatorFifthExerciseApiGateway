@@ -13,6 +13,8 @@ public class MessageDTO {
 
     private String from;
 
+    private String receiverId; // userId or groupId
+
     private String message;
 
     private LocationDTO location;

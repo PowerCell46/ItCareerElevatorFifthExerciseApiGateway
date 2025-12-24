@@ -12,9 +12,9 @@ import java.util.Date;
 @Controller
 public class WebSocketController {
 
-    @MessageMapping("/message")
-    @SendTo("/topic/messages")
-    public OutputMessage send(MessageDTO message) throws Exception {
+    @MessageMapping("/message") // When a client sends to a destination starting with /ws, route it to @MessageMapping methods
+    @SendTo("/topic/messages") // That means the server will forward the return value to /topic/messages.
+    public OutputMessage send(MessageDTO message) {
         String time = new SimpleDateFormat("HH:mm").format(new Date());
         System.out.println("-----: " + message);
 

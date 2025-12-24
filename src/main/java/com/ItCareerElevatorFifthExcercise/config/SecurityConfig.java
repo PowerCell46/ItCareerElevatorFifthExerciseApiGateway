@@ -50,8 +50,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(
                                         "/api/auth/register",
-                                        "/api/auth/login",
-                                        "/ws-endpoint/**"
+                                        "/api/auth/login"
                                 ).permitAll() // ! Also have to be added in JwtRequestFilter -> PUBLIC_ENDPOINTS
                                 .requestMatchers(
                                         "/api/auth/assign-roles"
@@ -59,6 +58,11 @@ public class SecurityConfig {
 //                        .requestMatchers(
 //                                "/api/manage/**"
 //                        ).hasAnyRole("MANAGER", "ADMIN") // expects ROLE_MANAGER or ROLE_ADMIN
+                                .requestMatchers(
+                                        "/ws-endpoint/**",
+                                        "/ws/**",
+                                        "/topic/**"
+                                ).authenticated()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->

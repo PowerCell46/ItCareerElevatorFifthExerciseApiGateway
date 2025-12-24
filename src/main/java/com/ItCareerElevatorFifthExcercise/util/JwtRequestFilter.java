@@ -41,6 +41,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             token = header.substring(7);
 
+        } else {
+            token = req.getParameter("token");
+        }
+
+        if (token != null) {
             try {
                 username = jwtUtils.extractUsername(token);
 
@@ -85,10 +90,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private boolean isPathPublic(String path) {
-        return true;
-//        Set<String> PUBLIC_ENDPOINTS = Set.of("/api/auth/register", "/api/auth/login");
-//
-//        return PUBLIC_ENDPOINTS.contains(path);
+        Set<String> PUBLIC_ENDPOINTS = Set.of("/api/auth/register", "/api/auth/login");
+
+        return PUBLIC_ENDPOINTS.contains(path);
     }
 
     private void writeJsonErrorResponse(HttpServletResponse response, String message) throws IOException {
