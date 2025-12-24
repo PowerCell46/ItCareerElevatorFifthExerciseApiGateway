@@ -1,6 +1,6 @@
 package com.ItCareerElevatorFifthExcercise.controllers;
 
-import com.ItCareerElevatorFifthExcercise.DTOs.ws.MessageDTO;
+import com.ItCareerElevatorFifthExcercise.DTOs.ws.WsMessageDTO;
 import com.ItCareerElevatorFifthExcercise.OutputMessage;
 import com.ItCareerElevatorFifthExcercise.entities.User;
 import com.ItCareerElevatorFifthExcercise.services.interfaces.UserService;
@@ -21,9 +21,9 @@ public class WebSocketController {
 
     @MessageMapping("/message")
     @SendTo("/topic/messages")
-    public OutputMessage send(MessageDTO message, Principal principal) {
+    public OutputMessage send(WsMessageDTO message, Principal principal) {
         String username = principal.getName();
-
+        System.out.println(message);
         User user = userService.getByUsername(username);
 
         String time = new SimpleDateFormat("HH:mm").format(new Date());
