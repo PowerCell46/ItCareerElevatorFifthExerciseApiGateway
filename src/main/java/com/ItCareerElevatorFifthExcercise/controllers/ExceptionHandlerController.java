@@ -3,6 +3,7 @@ package com.ItCareerElevatorFifthExcercise.controllers;
 import com.ItCareerElevatorFifthExcercise.DTOs.common.ErrorResponseDTO;
 import com.ItCareerElevatorFifthExcercise.exceptions.EmailIsAlreadyTakenException;
 import com.ItCareerElevatorFifthExcercise.exceptions.InvalidCredentialsException;
+import com.ItCareerElevatorFifthExcercise.exceptions.MessagingMicroserviceException;
 import com.ItCareerElevatorFifthExcercise.exceptions.NoSuchRoleException;
 import com.ItCareerElevatorFifthExcercise.exceptions.NoSuchUserException;
 import com.ItCareerElevatorFifthExcercise.exceptions.UsernameIsAlreadyTakenException;
@@ -23,6 +24,22 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @Slf4j
 @ControllerAdvice
 public class ExceptionHandlerController {
+
+    @ExceptionHandler(MessagingMicroserviceException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMessagingMicroserviceException(MessagingMicroserviceException ex) {
+        log.warn("Handling MessagingMicroserviceException.");
+        log.warn("Error status: {}, message: {}.", ex.getStatus(), ex.getMessage());
+
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                ex.getStatus(),
+                ex.getMessage(),
+                ex.getTimestamp()
+        );
+
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(error);
+    }
 
     @ExceptionHandler(UsernameIsAlreadyTakenException.class)
     public ResponseEntity<ErrorResponseDTO> handleUserAlreadyExistsException(UsernameIsAlreadyTakenException ex) {
