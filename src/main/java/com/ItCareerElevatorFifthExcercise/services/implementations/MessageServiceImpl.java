@@ -57,6 +57,6 @@ public class MessageServiceImpl implements MessageService {
                 ),
                 messageDTO.getReceiverId(),
                 messageDTO.getMessage()
-        )
+        );
     }
 }
