@@ -29,6 +29,6 @@ public class WebSocketController {
         messageService.sendMessage(message, username);
 
         String time = new SimpleDateFormat("HH:mm").format(new Date());
-        return new OutputMessage(username, message.getMessage(), time);
+        return new OutputMessage(username, message.getContent(), time);
     }
 }

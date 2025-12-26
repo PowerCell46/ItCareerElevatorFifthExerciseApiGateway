@@ -53,10 +53,10 @@ public class MessageServiceImpl implements MessageService {
                 new MsvcLocationRequestDTO(
                         messageDTO.getLocation().getLatitude(),
                         messageDTO.getLocation().getLongitude(),
-                        messageDTO.getLocation().getTimestamp()
+                        messageDTO.getLocation().getRecordedAt()
                 ),
                 messageDTO.getReceiverId(),
-                messageDTO.getMessage(),
+                messageDTO.getContent(),
                 messageDTO.getSentAt()
         );
     }

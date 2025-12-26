@@ -18,7 +18,7 @@ public class WsMessageDTO {
 
     private String receiverId; // ? userId or groupId
 
-    private String message;
+    private String content;
 
     private LocationDTO location;
 

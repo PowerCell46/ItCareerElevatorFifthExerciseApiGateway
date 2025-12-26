@@ -15,5 +15,5 @@ public class MsvcLocationRequestDTO {
 
     private Double longitude;
 
-    private Long timestamp;
+    private Long recordedAt;
 }

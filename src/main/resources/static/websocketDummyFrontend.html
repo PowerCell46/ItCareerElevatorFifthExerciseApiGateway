@@ -31,7 +31,7 @@
             });
         }
 
-        var stompClient = null;
+        let stompClient = null;
 
         function setConnected(connected) {
             document.getElementById('connect').disabled = connected;
@@ -43,7 +43,7 @@
 
         function connect() {
             // var socket = new SockJS('/chat');
-            var socket = new SockJS(`http://localhost:8080/ws-endpoint?token=${encodeURIComponent("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJQb3dlckNlbGw0NiIsImlhdCI6MTc2NjcwNTM4MSwiZXhwIjoxNzY2NzkxNzgxfQ.Bk95CQp-XYcJDE6VLfKub-TPJrhr_qQlrugvGfh1uJS-9-87ENo9LZG6cvhnVzLdLJRcamOn6SpjlUx5yeRFNg")}`);
+            const socket = new SockJS(`http://localhost:8080/ws-endpoint?token=${encodeURIComponent("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJQb3dlckNlbGw0NiIsImlhdCI6MTc2NjcwNTM4MSwiZXhwIjoxNzY2NzkxNzgxfQ.Bk95CQp-XYcJDE6VLfKub-TPJrhr_qQlrugvGfh1uJS-9-87ENo9LZG6cvhnVzLdLJRcamOn6SpjlUx5yeRFNg")}`);
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 setConnected(true);
@@ -65,16 +65,16 @@
         async function sendMessage() {
             try {
                 const location = await getUserLocation();
-                var text = document.getElementById('text').value;
+                const text = document.getElementById('text').value;
                 stompClient.send("/ws/message", {},
                     JSON.stringify({
-                        "receiverId": "Id...",
+                        "receiverId": "N/A",
                         sentAt: new Date().toISOString(),
-                        'message': text,
+                        'content': text,
                         location: {
                             latitude: location.latitude,
                             longitude: location.longitude,
-                            timestamp: location.timestamp,
+                            recordedAt: location.timestamp,
                         }
                     }));
 
@@ -84,8 +84,8 @@
         }
 
         function showMessageOutput(messageOutput) {
-            var response = document.getElementById('response');
-            var p = document.createElement('p');
+            const response = document.getElementById('response');
+            const p = document.createElement('p');
             p.style.wordWrap = 'break-word';
             p.appendChild(document.createTextNode(messageOutput.from + ": "
                 + messageOutput.text + " (" + messageOutput.time + ")"));
