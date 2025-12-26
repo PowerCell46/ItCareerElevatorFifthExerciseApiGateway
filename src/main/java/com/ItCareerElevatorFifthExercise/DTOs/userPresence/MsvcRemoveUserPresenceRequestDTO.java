@@ -7,9 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class MsvcUserPresenceDTO {
+public class MsvcRemoveUserPresenceRequestDTO {
 
     private String userId;
-
-    private String serverInstance;
 }
