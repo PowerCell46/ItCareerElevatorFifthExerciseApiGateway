@@ -1,4 +1,4 @@
-package com.ItCareerElevatorFifthExercise.util;
+package com.ItCareerElevatorFifthExercise.util.auth;
 
 import com.ItCareerElevatorFifthExercise.entities.User;
 import lombok.RequiredArgsConstructor;

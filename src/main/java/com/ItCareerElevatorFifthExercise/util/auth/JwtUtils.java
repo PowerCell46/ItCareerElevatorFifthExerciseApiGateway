@@ -1,4 +1,4 @@
-package com.ItCareerElevatorFifthExercise.util;
+package com.ItCareerElevatorFifthExercise.util.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;

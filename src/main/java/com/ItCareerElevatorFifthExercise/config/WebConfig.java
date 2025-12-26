@@ -11,11 +11,22 @@ public class WebConfig {
     @Value("${messaging-microservice.base-endpoint}")
     private String MESSAGING_MICROSERVICE_BASE_URL;
 
+    @Value("${user-presence-microservice.base-endpoint}")
+    private String USER_PRESENCE_MICROSERVICE_BASE_URL;
+
     @Bean
     public WebClient messagingWebClient() {
         return WebClient
                 .builder()
                 .baseUrl(MESSAGING_MICROSERVICE_BASE_URL)
+                .build();
+    }
+
+    @Bean
+    public WebClient presenceWebClient() {
+        return WebClient
+                .builder()
+                .baseUrl(USER_PRESENCE_MICROSERVICE_BASE_URL)
                 .build();
     }
 }

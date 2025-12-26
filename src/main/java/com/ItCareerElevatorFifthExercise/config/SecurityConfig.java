@@ -1,7 +1,7 @@
 package com.ItCareerElevatorFifthExercise.config;
 
-import com.ItCareerElevatorFifthExercise.util.JsonAccessDeniedHandler;
-import com.ItCareerElevatorFifthExercise.util.JwtRequestFilter;
+import com.ItCareerElevatorFifthExercise.util.auth.JsonAccessDeniedHandler;
+import com.ItCareerElevatorFifthExercise.util.auth.JwtRequestFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;

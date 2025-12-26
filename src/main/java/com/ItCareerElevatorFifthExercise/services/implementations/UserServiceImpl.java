@@ -14,8 +14,8 @@ import com.ItCareerElevatorFifthExercise.exceptions.UsernameIsAlreadyTakenExcept
 import com.ItCareerElevatorFifthExercise.repositories.UserRepository;
 import com.ItCareerElevatorFifthExercise.services.interfaces.RoleService;
 import com.ItCareerElevatorFifthExercise.services.interfaces.UserService;
-import com.ItCareerElevatorFifthExercise.util.CustomUserDetails;
-import com.ItCareerElevatorFifthExercise.util.JwtUtils;
+import com.ItCareerElevatorFifthExercise.util.auth.CustomUserDetails;
+import com.ItCareerElevatorFifthExercise.util.auth.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;

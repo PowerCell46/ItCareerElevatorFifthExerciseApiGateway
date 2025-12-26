@@ -1,4 +1,4 @@
-package com.ItCareerElevatorFifthExercise.util;
+package com.ItCareerElevatorFifthExercise.util.auth;
 
 import com.ItCareerElevatorFifthExercise.DTOs.common.ErrorResponseDTO;
 import com.ItCareerElevatorFifthExercise.services.interfaces.UserService;

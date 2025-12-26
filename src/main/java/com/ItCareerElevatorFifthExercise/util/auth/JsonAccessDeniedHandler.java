@@ -1,4 +1,4 @@
-package com.ItCareerElevatorFifthExercise.util;
+package com.ItCareerElevatorFifthExercise.util.auth;
 
 import com.ItCareerElevatorFifthExercise.DTOs.common.ErrorResponseDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
