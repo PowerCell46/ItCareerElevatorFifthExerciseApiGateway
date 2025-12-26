@@ -23,7 +23,7 @@ public class WebConfig {
     }
 
     @Bean
-    public WebClient presenceWebClient() {
+    public WebClient userPresenceWebClient() {
         return WebClient
                 .builder()
                 .baseUrl(USER_PRESENCE_MICROSERVICE_BASE_URL)
