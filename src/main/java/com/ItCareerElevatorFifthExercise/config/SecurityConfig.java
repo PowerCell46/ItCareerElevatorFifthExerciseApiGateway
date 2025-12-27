@@ -50,7 +50,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(
                                         "/api/auth/register",
-                                        "/api/auth/login"
+                                        "/api/auth/login",
+                                        "/internal/deliver" // TODO: Mot sure if that's ok...
                                 ).permitAll() // ! Also have to be added in JwtRequestFilter -> PUBLIC_ENDPOINTS
                                 .requestMatchers(
                                         "/api/auth/assign-roles"

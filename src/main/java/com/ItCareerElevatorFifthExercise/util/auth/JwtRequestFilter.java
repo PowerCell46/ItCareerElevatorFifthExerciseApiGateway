@@ -90,7 +90,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private boolean isPathPublic(String path) {
-        Set<String> PUBLIC_ENDPOINTS = Set.of("/api/auth/register", "/api/auth/login");
+        Set<String> PUBLIC_ENDPOINTS = Set.of("/api/auth/register", "/api/auth/login", "/internal/deliver");
 
         return PUBLIC_ENDPOINTS.contains(path);
     }

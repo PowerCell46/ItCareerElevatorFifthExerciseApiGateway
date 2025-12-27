@@ -43,7 +43,7 @@
 
         function connect() {
             // var socket = new SockJS('/chat');
-            const socket = new SockJS(`http://localhost:8080/ws-endpoint?token=${encodeURIComponent("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJQb3dlckNlbGw0NiIsImlhdCI6MTc2NjgzNDUxMiwiZXhwIjoxNzY2OTIwOTEyfQ._lo76VQ8FH4HMyUTR-ngVkQA_YhbO16Js9hUtM9ZYqj_2hQRxt7I1xFTentEZ7-o-xM_6IId_bEo6GMV4zyPqw")}`);
+            const socket = new SockJS(`http://localhost:8080/ws-endpoint?token=${encodeURIComponent("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJQb3dlckNlbGw0NiIsImlhdCI6MTc2Njg3MzU4MiwiZXhwIjoxNzY2OTU5OTgyfQ.afvcy7YVCwdJYfNUaWKUmt10qv2RD1jJFb5EA5sCGZapCMEdVy8Pi5bmxSizOJ_vYCqn1ONTg0RVyH0hQjJXIw")}`);
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 setConnected(true);
@@ -68,7 +68,7 @@
                 const text = document.getElementById('text').value;
                 stompClient.send("/ws/message", {},
                     JSON.stringify({
-                        "receiverId": "N/A",
+                        "receiverId": "b855d929-f0e9-418f-8ee4-318f173f1096",
                         sentAt: new Date().toISOString(),
                         'content': text,
                         location: {
