@@ -12,4 +12,6 @@ public class MsvcAddUserPresenceDTO {
     private String userId;
 
     private String serverInstanceAddress;
+
+    private String sessionId;
 }

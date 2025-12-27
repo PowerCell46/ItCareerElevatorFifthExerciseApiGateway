@@ -27,7 +27,8 @@ public class WebSocketEventsListener {
         String username = principal.getName();
 
         log.info("WebSocket connection from user {}.", username);
-        userPresenceService.addUserServerWebSocketConnectionInstanceAddress(username);
+        userPresenceService
+                .addUserServerWebSocketConnectionInstanceAddress(username, sessionId);
     }
 
     @EventListener
@@ -35,10 +36,10 @@ public class WebSocketEventsListener {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
 
         Principal principal = accessor.getUser();
-        String sessionId = accessor.getSessionId();
         String username = principal.getName();
 
         log.info("Closing WebSocket connection for user {}.", username);
-        userPresenceService.removeUserServerWebSocketConnectionInstanceAddress(username);
+        userPresenceService
+                .removeUserServerWebSocketConnectionInstanceAddress(username);
     }
 }

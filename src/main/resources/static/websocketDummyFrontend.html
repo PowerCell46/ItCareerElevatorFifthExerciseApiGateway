@@ -43,7 +43,7 @@
 
         function connect() {
             // var socket = new SockJS('/chat');
-            const socket = new SockJS(`http://localhost:8080/ws-endpoint?token=${encodeURIComponent("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJQb3dlckNlbGw0NiIsImlhdCI6MTc2Njc5Mjk1MSwiZXhwIjoxNzY2ODc5MzUxfQ.XCRnKq7MyE5dirwl2TrjtbVJY2PJ-b-Qi2gz4IQDjXpR564rNtMFqSxSM6xzdeddYbwGYPrNvvGl9-lJM158hA")}`);
+            const socket = new SockJS(`http://localhost:8080/ws-endpoint?token=${encodeURIComponent("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJQb3dlckNlbGw0NiIsImlhdCI6MTc2NjgzNDUxMiwiZXhwIjoxNzY2OTIwOTEyfQ._lo76VQ8FH4HMyUTR-ngVkQA_YhbO16Js9hUtM9ZYqj_2hQRxt7I1xFTentEZ7-o-xM_6IId_bEo6GMV4zyPqw")}`);
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 setConnected(true);

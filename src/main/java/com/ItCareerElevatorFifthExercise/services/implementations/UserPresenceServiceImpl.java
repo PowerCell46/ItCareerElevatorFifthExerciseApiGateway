@@ -26,12 +26,13 @@ public class UserPresenceServiceImpl implements UserPresenceService {
     private final WebClient userPresenceWebClient;
 
     @Override
-    public void addUserServerWebSocketConnectionInstanceAddress(String username) {
+    public void addUserServerWebSocketConnectionInstanceAddress(String username, String sessionId) {
         User loggedInUser = userService.getByUsername(username);
 
         MsvcAddUserPresenceDTO requestDTO = new MsvcAddUserPresenceDTO(
                 loggedInUser.getId(),
-                serverIdentity.getInstanceAddress()
+                serverIdentity.getInstanceAddress(),
+                sessionId
         );
 
         log.info("Making a request to the userPresence microservice.");
@@ -44,7 +45,7 @@ public class UserPresenceServiceImpl implements UserPresenceService {
                 .onStatus(HttpStatusCode::isError, // TODO: Look for a better approach (test all possible custom errors)
                         resp -> resp
                                 .bodyToMono(ErrorResponseDTO.class)
-                                .map(MessagingMicroserviceException::new)
+                                .map(MessagingMicroserviceException::new) // TODO: change
                                 .flatMap(Mono::error)
                 )
 //                .bodyToMono(OrderResponseDTO.class)
@@ -66,7 +67,7 @@ public class UserPresenceServiceImpl implements UserPresenceService {
                 .onStatus(HttpStatusCode::isError, // TODO: Look for a better approach (test all possible custom errors)
                         resp -> resp
                                 .bodyToMono(ErrorResponseDTO.class)
-                                .map(MessagingMicroserviceException::new)
+                                .map(MessagingMicroserviceException::new) // TODO: change
                                 .flatMap(Mono::error)
                 )
 //                .bodyToMono(OrderResponseDTO.class)
