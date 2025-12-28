@@ -1,7 +1,7 @@
 package com.ItCareerElevatorFifthExercise.services.implementations;
 
 import com.ItCareerElevatorFifthExercise.entities.Role;
-import com.ItCareerElevatorFifthExercise.exceptions.NoSuchRoleException;
+import com.ItCareerElevatorFifthExercise.exceptions.auth.NoSuchRoleException;
 import com.ItCareerElevatorFifthExercise.repositories.RoleRepository;
 import com.ItCareerElevatorFifthExercise.services.interfaces.RoleService;
 import lombok.RequiredArgsConstructor;

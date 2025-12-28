@@ -4,7 +4,7 @@ import com.ItCareerElevatorFifthExercise.DTOs.common.ErrorResponseDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.userPresence.MsvcAddUserPresenceDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.userPresence.MsvcRemoveUserPresenceRequestDTO;
 import com.ItCareerElevatorFifthExercise.entities.User;
-import com.ItCareerElevatorFifthExercise.exceptions.MessagingMicroserviceException;
+import com.ItCareerElevatorFifthExercise.exceptions.msvc.MessagingMicroserviceException;
 import com.ItCareerElevatorFifthExercise.services.interfaces.UserPresenceService;
 import com.ItCareerElevatorFifthExercise.services.interfaces.UserService;
 import com.ItCareerElevatorFifthExercise.util.ServerIdentity;

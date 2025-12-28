@@ -1,4 +1,4 @@
-package com.ItCareerElevatorFifthExercise.exceptions;
+package com.ItCareerElevatorFifthExercise.exceptions.auth;
 
 public class InvalidCredentialsException extends RuntimeException {
 

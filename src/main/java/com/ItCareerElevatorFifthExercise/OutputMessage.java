@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class OutputMessage {
+public class OutputMessage { // TODO: For deletion
 
     private String from;
 

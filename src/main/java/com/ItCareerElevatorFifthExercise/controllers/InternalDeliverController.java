@@ -17,9 +17,9 @@ public class InternalDeliverController { // * Handle messages on the receiver's 
 
     private final SimpMessageSendingOperations messagingTemplate;
 
-    @PostMapping("/deliverMessage")
-    public void deliverMessageToRecipient(@RequestBody HandleReceiveMessageRequestDTO request) {
-        log.info("Delivering message to session id: {}.", request.getSessionId());
+    @PostMapping("/deliverMessageToReceiver")
+    public void deliverMessageToReceiver(@RequestBody HandleReceiveMessageRequestDTO request) {
+        log.info("Delivering message to WS connection with session id: {}.", request.getSessionId());
 
         messagingTemplate
                 .convertAndSendToUser(

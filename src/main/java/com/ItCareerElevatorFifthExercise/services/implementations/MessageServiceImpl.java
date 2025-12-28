@@ -5,7 +5,7 @@ import com.ItCareerElevatorFifthExercise.DTOs.message.MsvcLocationRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.message.MsvcMessageRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.ws.WsMessageDTO;
 import com.ItCareerElevatorFifthExercise.entities.User;
-import com.ItCareerElevatorFifthExercise.exceptions.MessagingMicroserviceException;
+import com.ItCareerElevatorFifthExercise.exceptions.msvc.MessagingMicroserviceException;
 import com.ItCareerElevatorFifthExercise.services.interfaces.MessageService;
 import com.ItCareerElevatorFifthExercise.services.interfaces.UserService;
 import lombok.RequiredArgsConstructor;

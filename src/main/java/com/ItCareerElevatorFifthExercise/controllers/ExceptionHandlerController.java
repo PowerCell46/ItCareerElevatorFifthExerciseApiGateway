@@ -1,12 +1,12 @@
 package com.ItCareerElevatorFifthExercise.controllers;
 
 import com.ItCareerElevatorFifthExercise.DTOs.common.ErrorResponseDTO;
-import com.ItCareerElevatorFifthExercise.exceptions.EmailIsAlreadyTakenException;
-import com.ItCareerElevatorFifthExercise.exceptions.InvalidCredentialsException;
-import com.ItCareerElevatorFifthExercise.exceptions.MessagingMicroserviceException;
-import com.ItCareerElevatorFifthExercise.exceptions.NoSuchRoleException;
-import com.ItCareerElevatorFifthExercise.exceptions.NoSuchUserException;
-import com.ItCareerElevatorFifthExercise.exceptions.UsernameIsAlreadyTakenException;
+import com.ItCareerElevatorFifthExercise.exceptions.auth.EmailIsAlreadyTakenException;
+import com.ItCareerElevatorFifthExercise.exceptions.auth.InvalidCredentialsException;
+import com.ItCareerElevatorFifthExercise.exceptions.msvc.MessagingMicroserviceException;
+import com.ItCareerElevatorFifthExercise.exceptions.auth.NoSuchRoleException;
+import com.ItCareerElevatorFifthExercise.exceptions.auth.NoSuchUserException;
+import com.ItCareerElevatorFifthExercise.exceptions.auth.UsernameIsAlreadyTakenException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.validation.ConstraintViolation;

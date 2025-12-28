@@ -19,19 +19,26 @@ public class ServerIdentity {
     public String getHost() {
         if (host == null) {
             try {
-                host = InetAddress.getLocalHost().getHostName();
+                host = InetAddress
+                        .getLocalHost()
+                        .getHostName();
 
             } catch (UnknownHostException ex) {
                 host = "unknown-host";
             }
         }
+
         return host;
     }
 
     public String getPort() {
         if (port == null) { // works with random or fixed ports once server is started
-            port = environment.getProperty("local.server.port", environment.getProperty("server.port", "8080"));
+            port = environment.getProperty(
+                    "local.server.port",
+                    environment.getProperty("server.port", "8080")
+            );
         }
+
         return port;
     }
 
