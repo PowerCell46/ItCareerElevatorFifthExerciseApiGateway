@@ -7,7 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class PatchUserResponseDTO {
+public class AlterUserResponseDTO {
+
+    private String id;
 
     private String username;
 

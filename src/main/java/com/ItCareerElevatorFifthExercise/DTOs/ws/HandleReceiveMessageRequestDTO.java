@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ReceiveMessageRequestDTO {
+public class HandleReceiveMessageRequestDTO {
 
     private String sessionId;
 

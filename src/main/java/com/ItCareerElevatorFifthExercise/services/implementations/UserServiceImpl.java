@@ -4,7 +4,7 @@ import com.ItCareerElevatorFifthExercise.DTOs.auth.request.AssignRolesRequestDTO
 import com.ItCareerElevatorFifthExercise.DTOs.auth.request.PatchUserRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.auth.request.RegisterRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.auth.response.AuthResponseDTO;
-import com.ItCareerElevatorFifthExercise.DTOs.auth.response.PatchUserResponseDTO;
+import com.ItCareerElevatorFifthExercise.DTOs.auth.response.AlterUserResponseDTO;
 import com.ItCareerElevatorFifthExercise.entities.Role;
 import com.ItCareerElevatorFifthExercise.entities.User;
 import com.ItCareerElevatorFifthExercise.exceptions.EmailIsAlreadyTakenException;
@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void assignRolesToUser(AssignRolesRequestDTO requestDTO) {
+    public AlterUserResponseDTO assignRolesToUser(AssignRolesRequestDTO requestDTO) {
         User user = getByUsername(requestDTO.getUsername());
 
         requestDTO
@@ -146,10 +146,11 @@ public class UserServiceImpl implements UserService {
                 });
 
         save(user);
+        return new AlterUserResponseDTO(user.getId(), user.getUsername(), user.getEmail());
     }
 
     @Override
-    public PatchUserResponseDTO update(User user, PatchUserRequestDTO userRequest) {
+    public AlterUserResponseDTO update(User user, PatchUserRequestDTO userRequest) {
         if (userRequest.getUsername() != null) {
             if (userRepository.findByUsername(userRequest.getUsername()).isPresent()) {
                 throw new UsernameIsAlreadyTakenException(
@@ -177,7 +178,7 @@ public class UserServiceImpl implements UserService {
             save(user);
         }
 
-        return new PatchUserResponseDTO(user.getUsername(), user.getEmail());
+        return new AlterUserResponseDTO(user.getId(), user.getUsername(), user.getEmail());
     }
 
     @Override

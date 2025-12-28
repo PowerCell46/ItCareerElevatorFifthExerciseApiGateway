@@ -4,7 +4,7 @@ import com.ItCareerElevatorFifthExercise.DTOs.auth.request.AssignRolesRequestDTO
 import com.ItCareerElevatorFifthExercise.DTOs.auth.request.PatchUserRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.auth.request.RegisterRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.auth.response.AuthResponseDTO;
-import com.ItCareerElevatorFifthExercise.DTOs.auth.response.PatchUserResponseDTO;
+import com.ItCareerElevatorFifthExercise.DTOs.auth.response.AlterUserResponseDTO;
 import com.ItCareerElevatorFifthExercise.entities.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -20,7 +20,7 @@ public interface UserService extends UserDetailsService {
 
     User getCurrentlyLoggedUser();
 
-    void assignRolesToUser(AssignRolesRequestDTO requestDTO);
+    AlterUserResponseDTO assignRolesToUser(AssignRolesRequestDTO requestDTO);
 
-    PatchUserResponseDTO update(User user, PatchUserRequestDTO userRequest);
+    AlterUserResponseDTO update(User user, PatchUserRequestDTO userRequest);
 }

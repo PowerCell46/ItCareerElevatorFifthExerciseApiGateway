@@ -1,6 +1,6 @@
 package com.ItCareerElevatorFifthExercise.controllers;
 
-import com.ItCareerElevatorFifthExercise.DTOs.ws.ReceiveMessageRequestDTO;
+import com.ItCareerElevatorFifthExercise.DTOs.ws.HandleReceiveMessageRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -13,18 +13,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/internal")
-public class InternalDeliverController {
+public class InternalDeliverController { // * Handle messages on the receiver's part
 
     private final SimpMessageSendingOperations messagingTemplate;
 
-    @PostMapping("/deliver")
-    public void deliver(@RequestBody ReceiveMessageRequestDTO request) {
+    @PostMapping("/deliverMessage")
+    public void deliverMessageToRecipient(@RequestBody HandleReceiveMessageRequestDTO request) {
         log.info("Delivering message to session id: {}.", request.getSessionId());
 
         messagingTemplate
                 .convertAndSendToUser(
                         request.getSessionId(),
-                        "/topic/messages", // Not sure if it's correct
+                        "/topic/messages",
                         request.getContent()
                 );
     }

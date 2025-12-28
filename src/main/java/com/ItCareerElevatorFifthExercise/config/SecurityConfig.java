@@ -22,8 +22,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final JsonAccessDeniedHandler jsonAccessDeniedHandler;
     private final JwtRequestFilter jwtRequestFilter;
+    private final JsonAccessDeniedHandler jsonAccessDeniedHandler;
 
     public SecurityConfig(
             @Lazy JwtRequestFilter jwtRequestFilter,
@@ -51,7 +51,7 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/api/auth/register",
                                         "/api/auth/login",
-                                        "/internal/deliver" // TODO: Mot sure if that's ok...
+                                        "/internal/deliver" // TODO: Not sure if that's ok (can be accessed from outside also)
                                 ).permitAll() // ! Also have to be added in JwtRequestFilter -> PUBLIC_ENDPOINTS
                                 .requestMatchers(
                                         "/api/auth/assign-roles"

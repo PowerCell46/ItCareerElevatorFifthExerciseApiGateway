@@ -23,9 +23,6 @@ public class MsvcMessageRequestDTO {
     @JsonProperty("senderUsername")
     private String username;
 
-    @JsonProperty("senderEmail")
-    private String email;
-
     @JsonProperty("senderLocation")
     private MsvcLocationRequestDTO location;
 
