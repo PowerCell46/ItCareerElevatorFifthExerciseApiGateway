@@ -30,8 +30,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Service
 @Slf4j
+@Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AuthResponseDTO register(RegisterRequestDTO userRequest) { // ? Cache the users in Redis? (API gateway has to be as FAST as possible!)
+    public AuthResponseDTO register(RegisterRequestDTO userRequest) {
         validateRegisterData(userRequest);
 
         User user = new User(
@@ -99,6 +99,7 @@ public class UserServiceImpl implements UserService {
                     .authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
             UserDetails userDetails = (UserDetails) auth.getPrincipal();
+
             String jwtToken = jwtUtils.generateToken(userDetails.getUsername());
 
             return new AuthResponseDTO(userDetails.getUsername(), jwtToken);
@@ -117,7 +118,8 @@ public class UserServiceImpl implements UserService {
             return cud.getUser();
         }
 
-        throw new IllegalStateException("No authenticated user."); // Practically this would never happen
+        // Practically would never happen (it would, if you call from an endpoint method, where you aren't authenticated)
+        throw new IllegalStateException("Illegal state: no authenticated user.");
     }
 
     private Optional<User> findByUsername(String username) {
@@ -144,9 +146,13 @@ public class UserServiceImpl implements UserService {
                     Role role = roleService.getByName(roleName);
                     user.getRoles().add(role);
                 });
-
         save(user);
-        return new AlterUserResponseDTO(user.getId(), user.getUsername(), user.getEmail());
+
+        return new AlterUserResponseDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail()
+        );
     }
 
     @Override
@@ -168,8 +174,7 @@ public class UserServiceImpl implements UserService {
             user.setEmail(userRequest.getEmail());
         }
 
-        if (userRequest.getPassword() != null) {
-            // ? Normally this would happen by a link sent to the email for resetting password
+        if (userRequest.getPassword() != null) { // ? Normally this would happen by a link sent to the email for resetting the password
             user.setPassword(encodeUserPassword(userRequest.getPassword()));
         }
 

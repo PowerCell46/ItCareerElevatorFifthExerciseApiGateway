@@ -5,6 +5,7 @@ import com.ItCareerElevatorFifthExercise.DTOs.userPresence.MsvcAddUserPresenceDT
 import com.ItCareerElevatorFifthExercise.DTOs.userPresence.MsvcRemoveUserPresenceRequestDTO;
 import com.ItCareerElevatorFifthExercise.entities.User;
 import com.ItCareerElevatorFifthExercise.exceptions.msvc.MessagingMicroserviceException;
+import com.ItCareerElevatorFifthExercise.exceptions.msvc.UserPresenceMicroserviceException;
 import com.ItCareerElevatorFifthExercise.services.interfaces.UserPresenceService;
 import com.ItCareerElevatorFifthExercise.services.interfaces.UserService;
 import com.ItCareerElevatorFifthExercise.util.ServerIdentity;
@@ -26,7 +27,7 @@ public class UserPresenceServiceImpl implements UserPresenceService {
     private final WebClient userPresenceWebClient;
 
     @Override
-    public void addUserServerWebSocketConnectionInstanceAddress(String username, String sessionId) {
+    public void addUserServerWebSocketConnectionInstanceAndSessionAddress(String username, String sessionId) {
         User loggedInUser = userService.getByUsername(username);
 
         MsvcAddUserPresenceDTO requestDTO = new MsvcAddUserPresenceDTO(
@@ -45,19 +46,22 @@ public class UserPresenceServiceImpl implements UserPresenceService {
                 .onStatus(HttpStatusCode::isError, // TODO: Look for a better approach (test all possible custom errors)
                         resp -> resp
                                 .bodyToMono(ErrorResponseDTO.class)
-                                .map(MessagingMicroserviceException::new) // TODO: change
+                                .map(UserPresenceMicroserviceException::new)
                                 .flatMap(Mono::error)
                 )
-//                .bodyToMono(OrderResponseDTO.class)
                 .toBodilessEntity()
                 .block();
     }
 
     @Override
-    public void removeUserServerWebSocketConnectionInstanceAddress(String username) {
+    public void removeUserServerWebSocketConnectionInstanceAndSessionAddress(String username) {
         User loggedInUser = userService.getByUsername(username);
 
-        MsvcRemoveUserPresenceRequestDTO requestDTO = new MsvcRemoveUserPresenceRequestDTO(loggedInUser.getId());
+        MsvcRemoveUserPresenceRequestDTO requestDTO = new MsvcRemoveUserPresenceRequestDTO(
+                loggedInUser.getId()
+        );
+
+        log.info("Making a request to the userPresence microservice.");
 
         userPresenceWebClient
                 .method(HttpMethod.DELETE)
@@ -67,10 +71,9 @@ public class UserPresenceServiceImpl implements UserPresenceService {
                 .onStatus(HttpStatusCode::isError, // TODO: Look for a better approach (test all possible custom errors)
                         resp -> resp
                                 .bodyToMono(ErrorResponseDTO.class)
-                                .map(MessagingMicroserviceException::new) // TODO: change
+                                .map(UserPresenceMicroserviceException::new)
                                 .flatMap(Mono::error)
                 )
-//                .bodyToMono(OrderResponseDTO.class)
                 .toBodilessEntity()
                 .block();
     }

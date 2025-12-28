@@ -25,7 +25,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void sendMessage(WsMessageDTO messageDTO, String loggedInUserUsername) {
-        log.info("Making a request to the orders microservice.");
+        log.info("Making a request to the message microservice.");
 
         messagingWebClient
                 .post()
@@ -38,7 +38,7 @@ public class MessageServiceImpl implements MessageService {
                                 .map(MessagingMicroserviceException::new)
                                 .flatMap(Mono::error)
                 )
-//                .bodyToMono(OrderResponseDTO.class)
+//                .bodyToMono(SomeClass.class)
                 .toBodilessEntity()
                 .block();
     }
@@ -49,7 +49,6 @@ public class MessageServiceImpl implements MessageService {
         return new MsvcMessageRequestDTO(
                 loggedInUser.getId(),
                 loggedInUserUsername,
-                loggedInUser.getEmail(),
                 new MsvcLocationRequestDTO(
                         messageDTO.getLocation().getLatitude(),
                         messageDTO.getLocation().getLongitude(),

@@ -28,7 +28,7 @@ public class WebSocketEventsListener {
 
         log.info("WebSocket connection from user {}.", username);
         userPresenceService
-                .addUserServerWebSocketConnectionInstanceAddress(username, sessionId);
+                .addUserServerWebSocketConnectionInstanceAndSessionAddress(username, sessionId);
     }
 
     @EventListener
@@ -40,6 +40,6 @@ public class WebSocketEventsListener {
 
         log.info("Closing WebSocket connection for user {}.", username);
         userPresenceService
-                .removeUserServerWebSocketConnectionInstanceAddress(username);
+                .removeUserServerWebSocketConnectionInstanceAndSessionAddress(username);
     }
 }
