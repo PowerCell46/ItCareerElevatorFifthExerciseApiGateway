@@ -4,8 +4,7 @@ import com.ItCareerElevatorFifthExercise.DTOs.common.ErrorResponseDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.mail.SendMailMessageDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.message.MsvcLocationRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.message.MsvcMessageRequestDTO;
-import com.ItCareerElevatorFifthExercise.DTOs.ws.HandleReceiveMessageThroughEmailRequestDTO;
-import com.ItCareerElevatorFifthExercise.DTOs.ws.HandleReceiveMessageThroughWebSocketRequestDTO;
+import com.ItCareerElevatorFifthExercise.DTOs.receiveMessage.HandleReceiveMessageThroughEmailRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.ws.WsMessageDTO;
 import com.ItCareerElevatorFifthExercise.entities.User;
 import com.ItCareerElevatorFifthExercise.exceptions.msvc.MessagingMicroserviceException;
@@ -59,40 +58,6 @@ public class MessageServiceImpl implements MessageService {
                 .block();
     }
 
-    @Override
-    public void forwardMessageToEmail(HandleReceiveMessageThroughEmailRequestDTO requestDTO) {
-        User userSender = userService.getById(requestDTO.getSenderId());
-        User userReceiver = userService.getById(requestDTO.getReceiverId());
-
-        try {
-            String key = String.format("email-user-%s", userReceiver.getId());
-            String value = objectMapper.writeValueAsString(new SendMailMessageDTO(
-                    userSender.getUsername(),
-                    userReceiver.getEmail(),
-                    requestDTO.getContent()
-            ));
-
-            emailKafkaTemplate
-                    .send(MAIL_SEND_MESSAGE_TOPIC_NAME, key, value)
-                    .whenComplete((result, ex) -> {
-                        if (ex != null) {
-                            log.error("Failed to send SendMailMessageDTO to topic {}.", MAIL_SEND_MESSAGE_TOPIC_NAME, ex);
-
-                        } else {
-                            log.info("Sent SendMailMessageDTO {} to topic {} partition {} offset {}.",
-                                    key,
-                                    result.getRecordMetadata().topic(),
-                                    result.getRecordMetadata().partition(),
-                                    result.getRecordMetadata().offset()
-                            );
-                        }
-                    });
-
-        } catch (JsonProcessingException ex) { // TODO: Retry
-            log.error("Failed to serialize SendMailMessageDTO to JSON", ex);
-        }
-    }
-
     private MsvcMessageRequestDTO constructMsvcMessageRequestDTO(WsMessageDTO messageDTO, String loggedInUserUsername) {
         User loggedInUser = userService.getByUsername(loggedInUserUsername);
 
@@ -127,5 +92,40 @@ public class MessageServiceImpl implements MessageService {
 
                     return new MessagingMicroserviceException(error);
                 });
+    }
+
+
+    @Override
+    public void forwardMessageToEmail(HandleReceiveMessageThroughEmailRequestDTO requestDTO) {
+        User userSender = userService.getById(requestDTO.getSenderId());
+        User userReceiver = userService.getById(requestDTO.getReceiverId());
+
+        try {
+            String key = String.format("email-user-%s", userReceiver.getId());
+            String value = objectMapper.writeValueAsString(new SendMailMessageDTO(
+                    userSender.getUsername(),
+                    userReceiver.getEmail(),
+                    requestDTO.getContent()
+            ));
+
+            emailKafkaTemplate
+                    .send(MAIL_SEND_MESSAGE_TOPIC_NAME, key, value)
+                    .whenComplete((result, ex) -> {
+                        if (ex != null) {
+                            log.error("Failed to send SendMailMessageDTO to topic {}.", MAIL_SEND_MESSAGE_TOPIC_NAME, ex);
+
+                        } else {
+                            log.info("Sent SendMailMessageDTO {} to topic {} partition {} offset {}.",
+                                    key,
+                                    result.getRecordMetadata().topic(),
+                                    result.getRecordMetadata().partition(),
+                                    result.getRecordMetadata().offset()
+                            );
+                        }
+                    });
+
+        } catch (JsonProcessingException ex) { // TODO: Retry
+            log.error("Failed to serialize SendMailMessageDTO to JSON", ex);
+        }
     }
 }

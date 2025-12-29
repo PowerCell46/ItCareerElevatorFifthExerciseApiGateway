@@ -1,7 +1,7 @@
 package com.ItCareerElevatorFifthExercise.controllers;
 
-import com.ItCareerElevatorFifthExercise.DTOs.ws.HandleReceiveMessageThroughEmailRequestDTO;
-import com.ItCareerElevatorFifthExercise.DTOs.ws.HandleReceiveMessageThroughWebSocketRequestDTO;
+import com.ItCareerElevatorFifthExercise.DTOs.receiveMessage.HandleReceiveMessageThroughEmailRequestDTO;
+import com.ItCareerElevatorFifthExercise.DTOs.receiveMessage.HandleReceiveMessageThroughWebSocketRequestDTO;
 import com.ItCareerElevatorFifthExercise.services.interfaces.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ public class InternalDeliverController {
 
     @PostMapping("/deliverMessageToReceiverThroughWebSocket")
     public void deliverMessageToReceiverThroughWebSocket(@RequestBody HandleReceiveMessageThroughWebSocketRequestDTO requestDTO) {
-        log.info("Delivering message through WS connection with session id: {}.", requestDTO.getSessionId());
+        log.info("Delivering message through web socket connection with session id: {}.", requestDTO.getSessionId());
 
         messagingTemplate
                 .convertAndSendToUser(requestDTO.getSessionId(), "/topic/messages", requestDTO.getContent());

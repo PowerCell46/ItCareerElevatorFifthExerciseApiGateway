@@ -33,11 +33,7 @@ public class UserPresenceServiceImpl implements UserPresenceService {
     public void addUserServerWebSocketConnectionInstanceAndSessionAddress(String username, String sessionId) {
         User loggedInUser = userService.getByUsername(username);
 
-        MsvcAddUserPresenceDTO requestDTO = new MsvcAddUserPresenceDTO(
-                loggedInUser.getId(),
-                serverIdentity.getInstanceAddress(),
-                sessionId
-        );
+        var requestDTO = new MsvcAddUserPresenceDTO(loggedInUser.getId(), serverIdentity.getInstanceAddress(), sessionId);
 
         log.info("Making a request to the userPresence microservice.");
 
@@ -61,9 +57,7 @@ public class UserPresenceServiceImpl implements UserPresenceService {
     public void removeUserServerWebSocketConnectionInstanceAndSessionAddress(String username) {
         User loggedInUser = userService.getByUsername(username);
 
-        MsvcRemoveUserPresenceRequestDTO requestDTO = new MsvcRemoveUserPresenceRequestDTO(
-                loggedInUser.getId()
-        );
+        var requestDTO = new MsvcRemoveUserPresenceRequestDTO(loggedInUser.getId());
 
         log.info("Making a request to the userPresence microservice.");
 

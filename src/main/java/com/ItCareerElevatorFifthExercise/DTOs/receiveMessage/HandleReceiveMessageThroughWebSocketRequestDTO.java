@@ -1,4 +1,4 @@
-package com.ItCareerElevatorFifthExercise.DTOs.ws;
+package com.ItCareerElevatorFifthExercise.DTOs.receiveMessage;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
