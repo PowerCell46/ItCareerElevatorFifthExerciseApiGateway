@@ -3,6 +3,7 @@ package com.ItCareerElevatorFifthExercise.services.implementations;
 import com.ItCareerElevatorFifthExercise.DTOs.common.ErrorResponseDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.message.MsvcLocationRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.message.MsvcMessageRequestDTO;
+import com.ItCareerElevatorFifthExercise.DTOs.ws.HandleReceiveMessageRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.ws.WsMessageDTO;
 import com.ItCareerElevatorFifthExercise.entities.User;
 import com.ItCareerElevatorFifthExercise.exceptions.msvc.MessagingMicroserviceException;
@@ -11,7 +12,9 @@ import com.ItCareerElevatorFifthExercise.services.interfaces.UserService;
 import com.ItCareerElevatorFifthExercise.util.RetryPolicy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -24,8 +27,12 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
+    @Value("${app.kafka.topics.mail-send-message}")
+    private String MAIL_SEND_MESSAGE_TOPIC_NAME;
+
     private final UserService userService;
     private final WebClient messagingWebClient;
+    private final KafkaTemplate<String, String> emailKafkaTemplate;
 
     @Override
     public void sendMessage(WsMessageDTO messageDTO, String loggedInUserUsername) {
@@ -45,6 +52,12 @@ public class MessageServiceImpl implements MessageService {
                 .toBodilessEntity()
                 .retryWhen(buildRetrySpec())
                 .block();
+    }
+
+    @Override
+    public void forwardMessageToEmail(HandleReceiveMessageRequestDTO requestDTO) {
+        // Fetch the users
+        // Send a message to a kafka topic
     }
 
     private MsvcMessageRequestDTO constructMsvcMessageRequestDTO(WsMessageDTO messageDTO, String loggedInUserUsername) {
