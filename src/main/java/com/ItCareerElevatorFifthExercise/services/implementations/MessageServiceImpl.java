@@ -19,8 +19,6 @@ import reactor.util.retry.Retry;
 
 import java.time.Duration;
 
-import static com.ItCareerElevatorFifthExercise.util.RetryPolicy.isRetriable;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor

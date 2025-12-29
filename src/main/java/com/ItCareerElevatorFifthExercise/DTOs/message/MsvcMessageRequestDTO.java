@@ -21,7 +21,7 @@ public class MsvcMessageRequestDTO {
     private String userId;
 
     @JsonProperty("senderUsername")
-    private String username;
+    private String username; // For reading data convenience
 
     @JsonProperty("senderLocation")
     private MsvcLocationRequestDTO location;

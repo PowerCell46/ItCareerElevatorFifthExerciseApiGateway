@@ -51,7 +51,8 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/api/auth/register",
                                         "/api/auth/login",
-                                        "/internal/deliverMessageToReceiver" // TODO: Not sure if that's ok (can be accessed from outside also)
+                                        "/internal/deliverMessageToReceiverThroughWebSocket", // TODO: Not sure if that's ok (can be accessed from outside also)
+                                        "/internal/deliverMessageToReceiverThroughEmail" // TODO: Not sure if that's ok (can be accessed from outside also)
                                 ).permitAll() // ! Also have to be added in JwtRequestFilter -> PUBLIC_ENDPOINTS
                                 .requestMatchers(
                                         "/api/auth/assign-roles"
