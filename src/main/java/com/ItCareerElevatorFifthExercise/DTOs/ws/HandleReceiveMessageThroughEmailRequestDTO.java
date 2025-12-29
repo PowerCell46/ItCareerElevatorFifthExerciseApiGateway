@@ -7,9 +7,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class HandleReceiveMessageRequestDTO {
+public class HandleReceiveMessageThroughEmailRequestDTO {
 
-    private String sessionId;
+    private String senderId;
+
+    private String receiverId;
 
     private String content;
 }

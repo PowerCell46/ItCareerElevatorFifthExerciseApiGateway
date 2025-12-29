@@ -137,6 +137,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getById(String id) {
+        return userRepository
+                .findById(id)
+                .orElseThrow(() -> new NoSuchUserException(String.format("No user found with id %s.", id)));
+    }
+
+    @Override
     public AlterUserResponseDTO assignRolesToUser(AssignRolesRequestDTO requestDTO) {
         User user = getByUsername(requestDTO.getUsername());
 

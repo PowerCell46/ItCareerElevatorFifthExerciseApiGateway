@@ -18,6 +18,8 @@ public interface UserService extends UserDetailsService {
 
     User getByUsername(String username);
 
+    User getById(String id);
+
     User getCurrentlyLoggedUser();
 
     AlterUserResponseDTO assignRolesToUser(AssignRolesRequestDTO requestDTO);

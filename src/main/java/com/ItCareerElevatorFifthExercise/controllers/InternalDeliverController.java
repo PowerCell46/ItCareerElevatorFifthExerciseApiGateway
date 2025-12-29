@@ -1,6 +1,7 @@
 package com.ItCareerElevatorFifthExercise.controllers;
 
-import com.ItCareerElevatorFifthExercise.DTOs.ws.HandleReceiveMessageRequestDTO;
+import com.ItCareerElevatorFifthExercise.DTOs.ws.HandleReceiveMessageThroughEmailRequestDTO;
+import com.ItCareerElevatorFifthExercise.DTOs.ws.HandleReceiveMessageThroughWebSocketRequestDTO;
 import com.ItCareerElevatorFifthExercise.services.interfaces.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ public class InternalDeliverController {
     private final SimpMessageSendingOperations messagingTemplate;
 
     @PostMapping("/deliverMessageToReceiverThroughWebSocket")
-    public void deliverMessageToReceiverThroughWebSocket(@RequestBody HandleReceiveMessageRequestDTO requestDTO) {
+    public void deliverMessageToReceiverThroughWebSocket(@RequestBody HandleReceiveMessageThroughWebSocketRequestDTO requestDTO) {
         log.info("Delivering message through WS connection with session id: {}.", requestDTO.getSessionId());
 
         messagingTemplate
@@ -28,8 +29,8 @@ public class InternalDeliverController {
     }
 
     @PostMapping("/deliverMessageToReceiverThroughEmail")
-    public void deliverMessageToReceiverThroughEmail(@RequestBody HandleReceiveMessageRequestDTO requestDTO) {
-        log.info("Delivering message through email with receiverId: {}.", requestDTO.getSessionId());
+    public void deliverMessageToReceiverThroughEmail(@RequestBody HandleReceiveMessageThroughEmailRequestDTO requestDTO) {
+        log.info("Delivering message through email with receiverId: {}.", requestDTO.getReceiverId());
 
         messageService.forwardMessageToEmail(requestDTO);
     }

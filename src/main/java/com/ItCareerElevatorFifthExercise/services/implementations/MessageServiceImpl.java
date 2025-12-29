@@ -1,15 +1,19 @@
 package com.ItCareerElevatorFifthExercise.services.implementations;
 
 import com.ItCareerElevatorFifthExercise.DTOs.common.ErrorResponseDTO;
+import com.ItCareerElevatorFifthExercise.DTOs.mail.SendMailMessageDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.message.MsvcLocationRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.message.MsvcMessageRequestDTO;
-import com.ItCareerElevatorFifthExercise.DTOs.ws.HandleReceiveMessageRequestDTO;
+import com.ItCareerElevatorFifthExercise.DTOs.ws.HandleReceiveMessageThroughEmailRequestDTO;
+import com.ItCareerElevatorFifthExercise.DTOs.ws.HandleReceiveMessageThroughWebSocketRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.ws.WsMessageDTO;
 import com.ItCareerElevatorFifthExercise.entities.User;
 import com.ItCareerElevatorFifthExercise.exceptions.msvc.MessagingMicroserviceException;
 import com.ItCareerElevatorFifthExercise.services.interfaces.MessageService;
 import com.ItCareerElevatorFifthExercise.services.interfaces.UserService;
 import com.ItCareerElevatorFifthExercise.util.RetryPolicy;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +36,7 @@ public class MessageServiceImpl implements MessageService {
 
     private final UserService userService;
     private final WebClient messagingWebClient;
+    private final ObjectMapper objectMapper;
     private final KafkaTemplate<String, String> emailKafkaTemplate;
 
     @Override
@@ -55,9 +60,37 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void forwardMessageToEmail(HandleReceiveMessageRequestDTO requestDTO) {
-        // Fetch the users
-        // Send a message to a kafka topic
+    public void forwardMessageToEmail(HandleReceiveMessageThroughEmailRequestDTO requestDTO) {
+        User userSender = userService.getById(requestDTO.getSenderId());
+        User userReceiver = userService.getById(requestDTO.getReceiverId());
+
+        try {
+            String key = String.format("email-user-%s", userReceiver.getId());
+            String value = objectMapper.writeValueAsString(new SendMailMessageDTO(
+                    userSender.getUsername(),
+                    userReceiver.getEmail(),
+                    requestDTO.getContent()
+            ));
+
+            emailKafkaTemplate
+                    .send(MAIL_SEND_MESSAGE_TOPIC_NAME, key, value)
+                    .whenComplete((result, ex) -> {
+                        if (ex != null) {
+                            log.error("Failed to send SendMailMessageDTO to topic {}.", MAIL_SEND_MESSAGE_TOPIC_NAME, ex);
+
+                        } else {
+                            log.info("Sent SendMailMessageDTO {} to topic {} partition {} offset {}.",
+                                    key,
+                                    result.getRecordMetadata().topic(),
+                                    result.getRecordMetadata().partition(),
+                                    result.getRecordMetadata().offset()
+                            );
+                        }
+                    });
+
+        } catch (JsonProcessingException ex) { // TODO: Retry
+            log.error("Failed to serialize SendMailMessageDTO to JSON", ex);
+        }
     }
 
     private MsvcMessageRequestDTO constructMsvcMessageRequestDTO(WsMessageDTO messageDTO, String loggedInUserUsername) {
