@@ -24,7 +24,7 @@ public class InternalDeliverController {
     public void deliverMessageToReceiverThroughWebSocket(@RequestBody HandleReceiveMessageThroughWebSocketRequestDTO requestDTO) {
         log.info("Delivering message through web socket connection with session id: {}.", requestDTO.getSessionId());
 
-        messagingTemplate
+        messagingTemplate // TODO: Add the sentAt at the last parameter
                 .convertAndSendToUser(requestDTO.getSessionId(), "/topic/messages", requestDTO.getContent());
     }
 

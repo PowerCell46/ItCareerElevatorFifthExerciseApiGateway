@@ -105,7 +105,8 @@ public class MessageServiceImpl implements MessageService {
             String value = objectMapper.writeValueAsString(new SendMailMessageDTO(
                     userSender.getUsername(),
                     userReceiver.getEmail(),
-                    requestDTO.getContent()
+                    requestDTO.getContent(),
+                    requestDTO.getSentAt()
             ));
 
             emailKafkaTemplate
@@ -125,7 +126,7 @@ public class MessageServiceImpl implements MessageService {
                     });
 
         } catch (JsonProcessingException ex) { // TODO: Retry
-            log.error("Failed to serialize SendMailMessageDTO to JSON", ex);
+            log.error("Failed to serialize SendMailMessageDTO to JSON.", ex);
         }
     }
 }
