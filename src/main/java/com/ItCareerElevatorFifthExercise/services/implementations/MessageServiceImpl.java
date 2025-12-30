@@ -47,7 +47,7 @@ public class MessageServiceImpl implements MessageService {
                 .uri("/api/messages")
                 .bodyValue(constructMsvcMessageRequestDTO(messageDTO, loggedInUserUsername))
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
+                .onStatus(HttpStatusCode::isError, // TODO: Look for a better approach (test all possible custom errors)
                         resp -> resp
                                 .bodyToMono(ErrorResponseDTO.class)
                                 .map(MessagingMicroserviceException::new)
@@ -93,7 +93,6 @@ public class MessageServiceImpl implements MessageService {
                     return new MessagingMicroserviceException(error);
                 });
     }
-
 
     @Override
     public void forwardMessageToEmail(HandleReceiveMessageThroughEmailRequestDTO requestDTO) {

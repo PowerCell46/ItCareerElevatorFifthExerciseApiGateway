@@ -12,7 +12,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic"); // The in-memory broker will handle destinations starting with /topic and push messages to subscribers
+        // The in-memory broker will handle destinations starting with /topic and push messages to subscribers
+        config.enableSimpleBroker("/topic");
         config.setApplicationDestinationPrefixes("/ws");
     }
 
