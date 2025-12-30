@@ -1,5 +1,4 @@
 <html>
-
 <head>
     <title>Chat WebSocket</title>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
@@ -36,14 +35,21 @@
         function setConnected(connected) {
             document.getElementById('connect').disabled = connected;
             document.getElementById('disconnect').disabled = !connected;
-            document.getElementById('conversationDiv').style.visibility
-                = connected ? 'visible' : 'hidden';
+            document.getElementById('conversationDiv').style.visibility =
+                connected ? 'visible' : 'hidden';
             document.getElementById('response').innerHTML = '';
         }
 
         function connect() {
-            // var socket = new SockJS('/chat');
-            const socket = new SockJS(`http://localhost:8080/ws-endpoint?token=${encodeURIComponent("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJQb3dlckNlbGw0NiIsImlhdCI6MTc2Njk5ODg1NSwiZXhwIjoxNzY3MDg1MjU1fQ.UXi6UPX9xEq_cg9Mo9YDzjM1sQz5W2Dic9W4fyUbB5jDK_nNXWSJqno8C72TPJiOK5BiXzyet3QFjffdxSZB3Q")}`);
+            const token = document.getElementById('jwtToken').value.trim();
+            if (!token) {
+                alert('Please paste a JWT token first.');
+                return;
+            }
+
+            const socket = new SockJS(
+                `http://localhost:8080/ws-endpoint?token=${encodeURIComponent(token)}`
+            );
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 setConnected(true);
@@ -64,20 +70,29 @@
 
         async function sendMessage() {
             try {
+                const receiverId = document.getElementById('receiverId').value.trim();
+                if (!receiverId) {
+                    alert('Please enter a receiver ID.');
+                    return;
+                }
+
                 const location = await getUserLocation();
                 const text = document.getElementById('text').value;
-                stompClient.send("/ws/message", {},
+
+                stompClient.send(
+                    "/ws/message",
+                    {},
                     JSON.stringify({
-                        "receiverId": "130b9118-4c9e-43de-8c5a-d2d7dfb5a2d0",
+                        receiverId: receiverId,
                         sentAt: new Date().toISOString(),
-                        'content': text,
+                        content: text,
                         location: {
                             latitude: location.latitude,
                             longitude: location.longitude,
-                            recordedAt: location.timestamp,
+                            recordedAt: location.timestamp
                         }
-                    }));
-
+                    })
+                );
             } catch (error) {
                 console.error("Failed to get location:", error.message);
             }
@@ -87,8 +102,12 @@
             const response = document.getElementById('response');
             const p = document.createElement('p');
             p.style.wordWrap = 'break-word';
-            p.appendChild(document.createTextNode(messageOutput.from + ": "
-                + messageOutput.text + " (" + messageOutput.time + ")"));
+            p.appendChild(
+                document.createTextNode(
+                    messageOutput.from + ": " +
+                    messageOutput.text + " (" + messageOutput.time + ")"
+                )
+            );
             response.appendChild(p);
         }
     </script>
@@ -100,6 +119,19 @@
         <input type="text" id="from" placeholder="Choose a nickname"/>
     </div>
     <br/>
+
+    <!-- JWT token -->
+    <div>
+        <input type="text" id="jwtToken" placeholder="Paste JWT token here" style="width: 600px;"/>
+    </div>
+    <br/>
+
+    <!-- Receiver ID -->
+    <div>
+        <input type="text" id="receiverId" placeholder="Paste receiverId (UUID)" style="width: 600px;"/>
+    </div>
+    <br/>
+
     <div>
         <button id="connect" onclick="connect();">Connect</button>
         <button id="disconnect" disabled="disabled" onclick="disconnect();">
@@ -113,7 +145,5 @@
         <p id="response"></p>
     </div>
 </div>
-
 </body>
-
 </html>

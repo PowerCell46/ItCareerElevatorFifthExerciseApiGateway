@@ -43,7 +43,7 @@ public class WebSocketController {
     @MessageExceptionHandler
     @SendToUser("/queue/errors")
     public String handleException(MethodArgumentNotValidException ex) {
-        log.error("Handling validation error in WebSocket message: {}", ex.getMessage());
+        log.error("Handling validation error in WebSocket message: {}.", ex.getMessage());
 
         return "Validation error: " + ex.getBindingResult()
                 .getAllErrors()

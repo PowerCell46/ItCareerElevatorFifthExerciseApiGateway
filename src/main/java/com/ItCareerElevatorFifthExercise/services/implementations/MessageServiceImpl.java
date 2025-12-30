@@ -36,7 +36,7 @@ public class MessageServiceImpl implements MessageService {
     private final UserService userService;
     private final WebClient messagingWebClient;
     private final ObjectMapper objectMapper;
-    private final KafkaTemplate<String, String> emailKafkaTemplate;
+    private final KafkaTemplate<String, String> emailMessageKafkaTemplate;
 
     @Override
     public void sendMessage(WsMessageDTO messageDTO, String loggedInUserUsername) {
@@ -109,19 +109,14 @@ public class MessageServiceImpl implements MessageService {
                     requestDTO.getSentAt()
             ));
 
-            emailKafkaTemplate
+            emailMessageKafkaTemplate
                     .send(MAIL_SEND_MESSAGE_TOPIC_NAME, key, value)
                     .whenComplete((result, ex) -> {
                         if (ex != null) {
                             log.error("Failed to send SendMailMessageDTO to topic {}.", MAIL_SEND_MESSAGE_TOPIC_NAME, ex);
 
                         } else {
-                            log.info("Sent SendMailMessageDTO {} to topic {} partition {} offset {}.",
-                                    key,
-                                    result.getRecordMetadata().topic(),
-                                    result.getRecordMetadata().partition(),
-                                    result.getRecordMetadata().offset()
-                            );
+                            log.info("Success sending SendMailMessageDTO to topic {}.", MAIL_SEND_MESSAGE_TOPIC_NAME);
                         }
                     });
 

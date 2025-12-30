@@ -40,7 +40,12 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, String> emailKafkaTemplate() {
+    public KafkaTemplate<String, String> emailMessageKafkaTemplate() {
+        return new KafkaTemplate<>(sendMessageProducerFactory());
+    }
+
+    @Bean
+    public KafkaTemplate<String, String> registerEmailKafkaTemplate() {
         return new KafkaTemplate<>(sendMessageProducerFactory());
     }
 }
