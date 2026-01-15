@@ -14,6 +14,9 @@ public class WebConfig {
     @Value("${user-presence-microservice.base-endpoint}")
     private String USER_PRESENCE_MICROSERVICE_BASE_URL;
 
+    @Value("${message-persistence-microservice.base-endpoint}")
+    private String MESSAGE_PERSISTENCE_MICROSERVICE_BASE_URL;
+
     @Bean
     public WebClient messagingWebClient() {
         return WebClient
@@ -27,6 +30,14 @@ public class WebConfig {
         return WebClient
                 .builder()
                 .baseUrl(USER_PRESENCE_MICROSERVICE_BASE_URL)
+                .build();
+    }
+
+    @Bean
+    public WebClient messagePersistenceWebClient() {
+        return WebClient
+                .builder()
+                .baseUrl(MESSAGE_PERSISTENCE_MICROSERVICE_BASE_URL)
                 .build();
     }
 }
