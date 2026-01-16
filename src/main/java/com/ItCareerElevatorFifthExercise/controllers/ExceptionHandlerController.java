@@ -3,6 +3,7 @@ package com.ItCareerElevatorFifthExercise.controllers;
 import com.ItCareerElevatorFifthExercise.DTOs.common.ErrorResponseDTO;
 import com.ItCareerElevatorFifthExercise.exceptions.auth.EmailIsAlreadyTakenException;
 import com.ItCareerElevatorFifthExercise.exceptions.auth.InvalidCredentialsException;
+import com.ItCareerElevatorFifthExercise.exceptions.msvc.MessagePersistenceMicroserviceException;
 import com.ItCareerElevatorFifthExercise.exceptions.msvc.MessagingMicroserviceException;
 import com.ItCareerElevatorFifthExercise.exceptions.auth.NoSuchRoleException;
 import com.ItCareerElevatorFifthExercise.exceptions.auth.NoSuchUserException;
@@ -25,6 +26,22 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @Slf4j
 @ControllerAdvice
 public class ExceptionHandlerController {
+
+    @ExceptionHandler(MessagePersistenceMicroserviceException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMessagePersistenceMicroserviceException(MessagePersistenceMicroserviceException ex) {
+        log.warn("Handling MessagePersistenceMicroserviceException.");
+        log.warn("Error status: {}, message: {}.", ex.getStatus(), ex.getMessage());
+
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                ex.getStatus(),
+                ex.getMessage(),
+                ex.getTimestamp()
+        );
+
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(error);
+    }
 
     @ExceptionHandler(UserPresenceMicroserviceException.class)
     public ResponseEntity<ErrorResponseDTO> handleUserPresenceMicroserviceException(UserPresenceMicroserviceException ex) {

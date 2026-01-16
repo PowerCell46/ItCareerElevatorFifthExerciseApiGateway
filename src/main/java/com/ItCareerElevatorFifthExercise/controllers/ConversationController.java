@@ -1,7 +1,7 @@
 package com.ItCareerElevatorFifthExercise.controllers;
 
 import com.ItCareerElevatorFifthExercise.DTOs.message.ConversationSummaryResponseDTO;
-import com.ItCareerElevatorFifthExercise.services.interfaces.MessageService;
+import com.ItCareerElevatorFifthExercise.services.interfaces.ConversationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +19,13 @@ import java.util.List;
 @RequestMapping("/api/conversation")
 public class ConversationController {
 
-    private final MessageService messageService;
+    private final ConversationService conversionService;
 
     @GetMapping
     public ResponseEntity<List<ConversationSummaryResponseDTO>> getUserConversationsLastMessage() {
-        log.info("GET request on /api/conversation.");
+        log.info("---> GET request on /api/conversation.");
 
-        var responseDTO = messageService.getUserConversationsLastMessage();
+        var responseDTO = conversionService.getUserConversationsLastMessage();
 
         return ResponseEntity.ok(responseDTO);
     }

@@ -37,7 +37,6 @@ public class MessageServiceImpl implements MessageService {
 
     private final UserService userService;
     private final WebClient messagingWebClient;
-    private final WebClient messagePersistenceWebClient;
     private final ObjectMapper objectMapper;
     private final KafkaTemplate<String, String> emailMessageKafkaTemplate;
 
@@ -125,27 +124,5 @@ public class MessageServiceImpl implements MessageService {
         } catch (JsonProcessingException ex) { // TODO: Retry
             log.error("Failed to serialize SendMailMessageDTO to JSON.", ex);
         }
-    }
-
-    @Override
-    public List<ConversationSummaryResponseDTO> getUserConversationsLastMessage() {
-        User loggedInUser = userService.getCurrentlyLoggedUser();
-
-        log.info("Making a request to the message persistence microservice.");
-
-        return messagePersistenceWebClient
-                .get()
-                .uri("/api/conversations/" + loggedInUser.getId())
-                .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        resp -> resp
-                                .bodyToMono(ErrorResponseDTO.class)
-                                .map(MessagingMicroserviceException::new)
-                                .flatMap(Mono::error)
-                )
-                .bodyToFlux(ConversationSummaryResponseDTO.class)
-                .collectList()
-                .retryWhen(buildRetrySpec())
-                .block();
     }
 }
