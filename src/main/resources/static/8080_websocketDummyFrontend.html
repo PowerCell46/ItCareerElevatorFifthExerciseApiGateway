@@ -1,0 +1,581 @@
+<html>
+<head>
+    <title>Chat WebSocket</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Connection Panel */
+        .connection-panel {
+            background-color: #242424;
+            padding: 16px 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .connection-panel.collapsed {
+            padding: 10px 20px;
+        }
+
+        .connection-panel.collapsed .connection-fields {
+            display: none;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .connection-panel.collapsed .panel-header {
+            margin-bottom: 0;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #0084ff;
+            cursor: pointer;
+            font-size: 13px;
+            padding: 4px 8px;
+        }
+
+        .toggle-btn:hover {
+            text-decoration: underline;
+        }
+
+        .connection-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .connection-panel input[type="text"] {
+            flex: 1;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .connection-panel input[type="text"]:focus {
+            border-color: #0084ff;
+        }
+
+        .connection-panel input[type="text"]::placeholder {
+            color: #777;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-connect {
+            background-color: #0084ff;
+            color: white;
+        }
+
+        .btn-connect:hover:not(:disabled) {
+            background-color: #0073e6;
+        }
+
+        .btn-connect:disabled {
+            background-color: #004c99;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-disconnect {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-disconnect:hover:not(:disabled) {
+            background-color: #c82333;
+        }
+
+        .btn-disconnect:disabled {
+            background-color: #6c1a23;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #dc3545;
+        }
+
+        .status-dot.connected {
+            background-color: #28a745;
+        }
+
+        /* Chat Area */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #conversationDiv {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            visibility: hidden;
+        }
+
+        #conversationDiv.visible {
+            visibility: visible;
+        }
+
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #response {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Message Bubbles */
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .message-received {
+            align-self: flex-start;
+            background-color: #333;
+            color: #fff;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-sent {
+            align-self: flex-end;
+            background-color: #0084ff;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-content {
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .message-meta {
+            font-size: 11px;
+            margin-top: 4px;
+            opacity: 0.7;
+        }
+
+        .message-received .message-meta {
+            color: #aaa;
+        }
+
+        .message-sent .message-meta {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .message-sender {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: #0084ff;
+        }
+
+        .message-sent .message-sender {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 12px 16px 20px;
+            background-color: #1a1a1a;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: #3a3a3a;
+            border-radius: 24px;
+            padding: 6px 6px 6px 18px;
+        }
+
+        #text {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 15px;
+            padding: 8px 0;
+            outline: none;
+        }
+
+        #text::placeholder {
+            color: #888;
+        }
+
+        #sendMessage {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background-color: #0084ff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, transform 0.1s;
+            flex-shrink: 0;
+        }
+
+        #sendMessage:hover {
+            background-color: #0073e6;
+        }
+
+        #sendMessage:active {
+            transform: scale(0.95);
+        }
+
+        #sendMessage svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+            margin-left: 2px;
+        }
+
+        /* Placeholder when not connected */
+        .not-connected-placeholder {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            font-size: 16px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Scrollbar styling */
+        .messages-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages-area::-webkit-scrollbar-thumb {
+            background-color: #444;
+            border-radius: 3px;
+        }
+
+        .messages-area::-webkit-scrollbar-thumb:hover {
+            background-color: #555;
+        }
+
+        /* Hidden nickname field - keeping for compatibility */
+        #from {
+            display: none;
+        }
+    </style>
+    <script type="text/javascript">
+        function getUserLocation() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error("Geolocation not supported"));
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        resolve({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            accuracy: position.coords.accuracy,
+                            timestamp: position.timestamp
+                        });
+                    },
+                    (error) => reject(error),
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            });
+        }
+
+        let stompClient = null;
+
+        function setConnected(connected) {
+            document.getElementById('connect').disabled = connected;
+            document.getElementById('disconnect').disabled = !connected;
+            document.getElementById('conversationDiv').style.visibility =
+                connected ? 'visible' : 'hidden';
+            document.getElementById('response').innerHTML = '';
+
+            // Update status indicator
+            const statusDot = document.querySelector('.status-dot');
+            const statusText = document.querySelector('.status-text');
+            if (statusDot) {
+                statusDot.classList.toggle('connected', connected);
+            }
+            if (statusText) {
+                statusText.textContent = connected ? 'Connected' : 'Disconnected';
+            }
+
+            // Update placeholder visibility
+            const placeholder = document.querySelector('.not-connected-placeholder');
+            if (placeholder) {
+                placeholder.style.display = connected ? 'none' : 'flex';
+            }
+        }
+
+        function connect() {
+            const token = document.getElementById('jwtToken').value.trim();
+            if (!token) {
+                alert('Please paste a JWT token first.');
+                return;
+            }
+
+            const socket = new SockJS(
+                `http://localhost:8080/ws-endpoint?token=${encodeURIComponent(token)}`
+            );
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                setConnected(true);
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/user/queue/messages', function (messageOutput) {
+                    showMessageOutput(JSON.parse(messageOutput.body));
+                });
+                stompClient.subscribe('/user/queue/acknowledgements', function (messageOutput) {
+                    showAcknowledgement(JSON.parse(messageOutput.body));
+                });
+            });
+        }
+
+        function disconnect() {
+            if (stompClient != null) {
+                stompClient.disconnect();
+            }
+            setConnected(false);
+            console.log("Disconnected");
+        }
+
+        async function sendMessage() {
+            try {
+                const receiverId = document.getElementById('receiverId').value.trim();
+                if (!receiverId) {
+                    alert('Please enter a receiver ID.');
+                    return;
+                }
+
+                const location = await getUserLocation();
+                const text = document.getElementById('text').value;
+
+                stompClient.send(
+                    "/ws/message",
+                    {},
+                    JSON.stringify({
+                        receiverId: receiverId,
+                        sentAt: new Date().toISOString(),
+                        content: text,
+                        location: {
+                            latitude: location.latitude,
+                            longitude: location.longitude,
+                            recordedAt: location.timestamp
+                        }
+                    })
+                );
+            } catch (error) {
+                console.error("Failed to get location:", error.message);
+            }
+        }
+
+        function showMessageOutput(messageOutput) {
+            const response = document.getElementById('response');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message message-received';
+
+            const from = messageOutput.senderUsername || messageOutput.from;
+            const text = messageOutput.content || messageOutput.text;
+            const time = messageOutput.sentAt
+                ? new Date(messageOutput.sentAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+                : (messageOutput.time || '');
+
+            messageDiv.innerHTML = `
+                <div class="message-sender">${from}</div>
+                <div class="message-content">${text}</div>
+                <div class="message-meta">${time}</div>
+            `;
+
+            response.appendChild(messageDiv);
+
+            // Auto-scroll to bottom
+            const messagesArea = document.querySelector('.messages-area');
+            if (messagesArea) {
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            }
+        }
+
+        function showAcknowledgement(ack) {
+            const response = document.getElementById('response');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message message-sent';
+
+            const time = ack.sentAt
+                ? new Date(ack.sentAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+                : '';
+
+            messageDiv.innerHTML = `
+                <div class="message-content">${ack.content}</div>
+                <div class="message-meta">✓ ${time}</div>
+            `;
+
+            response.appendChild(messageDiv);
+            document.getElementById('text').value = '';
+
+            // Auto-scroll to bottom
+            const messagesArea = document.querySelector('.messages-area');
+            if (messagesArea) {
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            }
+        }
+
+        function toggleConnectionPanel() {
+            const panel = document.querySelector('.connection-panel');
+            const toggleBtn = document.querySelector('.toggle-btn');
+            panel.classList.toggle('collapsed');
+            toggleBtn.textContent = panel.classList.contains('collapsed') ? 'Show' : 'Hide';
+        }
+
+        // Allow sending message with Enter key
+        document.addEventListener('DOMContentLoaded', function () {
+            const textInput = document.getElementById('text');
+            if (textInput) {
+                textInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+
+<body onload="disconnect()">
+<!-- Hidden nickname field for compatibility -->
+<input type="text" id="from" placeholder="Choose a nickname"/>
+
+<!-- Connection Panel -->
+<div class="connection-panel">
+    <div class="panel-header">
+        <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span class="status-text">Disconnected</span>
+        </div>
+        <button class="toggle-btn" onclick="toggleConnectionPanel()">Hide</button>
+    </div>
+    <div class="connection-fields">
+        <div class="input-row">
+            <input type="text" id="jwtToken" placeholder="Paste JWT token here"/>
+        </div>
+        <div class="input-row">
+            <input type="text" id="receiverId" placeholder="Paste receiverId (UUID)"/>
+        </div>
+        <div class="input-row">
+            <button id="connect" class="btn btn-connect" onclick="connect();">Connect</button>
+            <button id="disconnect" class="btn btn-disconnect" disabled="disabled" onclick="disconnect();">Disconnect
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Chat Container -->
+<div class="chat-container">
+    <div class="not-connected-placeholder">
+        <p>Enter your JWT token and receiver ID above,<br>then click Connect to start chatting</p>
+    </div>
+
+    <div id="conversationDiv">
+        <div class="messages-area">
+            <div id="response"></div>
+        </div>
+        <div class="input-area">
+            <div class="input-wrapper">
+                <input type="text" id="text" placeholder="Aa"/>
+                <button id="sendMessage" onclick="sendMessage();">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
