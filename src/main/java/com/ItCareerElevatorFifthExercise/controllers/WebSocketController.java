@@ -1,5 +1,6 @@
 package com.ItCareerElevatorFifthExercise.controllers;
 
+import com.ItCareerElevatorFifthExercise.DTOs.ws.WsMessageAcknowledgementDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.ws.WsMessageDTO;
 import com.ItCareerElevatorFifthExercise.services.interfaces.MessageService;
 import jakarta.validation.Valid;
@@ -24,14 +25,15 @@ public class WebSocketController {
 
     private final MessageService messageService;
 
+    @SendToUser("/queue/acknowledgements")
     @MessageMapping("/message")
-    public void send(@Valid WsMessageDTO message, Principal principal) {
+    public WsMessageAcknowledgementDTO send(@Valid WsMessageDTO message, Principal principal) {
         String username = principal.getName();
 
         log.info("---> Sent message: {}{}.", System.lineSeparator(), message);
         messageService.sendMessage(message, username);
 
-        // TODO: Return some type of acknowledgement, so the user knows the msg was successful
+        return new WsMessageAcknowledgementDTO(message.getContent(), message.getSentAt());
     }
 
     @MessageExceptionHandler

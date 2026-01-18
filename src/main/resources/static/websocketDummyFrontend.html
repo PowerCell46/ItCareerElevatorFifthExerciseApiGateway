@@ -57,6 +57,9 @@
                 stompClient.subscribe('/user/queue/messages', function (messageOutput) {
                     showMessageOutput(JSON.parse(messageOutput.body));
                 });
+                stompClient.subscribe('/user/queue/acknowledgements', function (messageOutput) {
+                    showAcknowledgement(JSON.parse(messageOutput.body));
+                });
             });
         }
 
@@ -109,6 +112,21 @@
                 : (messageOutput.time || '');
             p.appendChild(document.createTextNode(from + ': ' + text + ' (' + time + ')'));
             response.appendChild(p);
+        }
+
+        function showAcknowledgement(ack) {
+            const response = document.getElementById('response');
+            const p = document.createElement('p');
+            p.style.wordWrap = 'break-word';
+            p.style.color = '#2e7d32';
+            p.style.fontStyle = 'italic';
+            const time = ack.sentAt
+                ? new Date(ack.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : '';
+            p.appendChild(document.createTextNode(`\u2713 "${ack.content}" sent at ${time}`));
+
+            response.appendChild(p);
+            document.getElementById('text').value = '';
         }
     </script>
 </head>
