@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 public class ForwardMessageListener {
 
     private final ServerIdentity serverIdentity;
-
     private final SimpMessageSendingOperations messagingTemplate;
 
     @KafkaListener(
@@ -25,6 +24,9 @@ public class ForwardMessageListener {
     )
     public void handleMessageForwardMessage(HandleReceiveMessageThroughWebSocketDTO webSocketDTO) {
         log.info("---> Handling message in the Kafka topic.");
+
+        if (webSocketDTO == null || webSocketDTO.getServerInstanceAddress() == null)
+            return;
 
         if (isReceiverWebSocketConnectionLocatedOnCurrentInstance(webSocketDTO.getServerInstanceAddress())) {
             log.info("Delivering message through web socket connection with session id: {}.", webSocketDTO.getSessionId());

@@ -16,6 +16,8 @@ public class HandleReceiveMessageThroughEmailRequestDTO {
 
     private String senderId;
 
+    private String senderUsername; // For visualizing data convenience
+
     private String receiverId;
 
     private String content;

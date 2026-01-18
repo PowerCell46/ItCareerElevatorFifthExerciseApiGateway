@@ -98,13 +98,12 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void forwardMessageToEmail(HandleReceiveMessageThroughEmailRequestDTO requestDTO) {
-        User userSender = userService.getById(requestDTO.getSenderId());
         User userReceiver = userService.getById(requestDTO.getReceiverId());
 
         try {
             String key = String.format("email-user-%s", userReceiver.getId());
             String value = objectMapper.writeValueAsString(new SendMailMessageDTO(
-                    userSender.getUsername(),
+                    requestDTO.getSenderUsername(),
                     userReceiver.getEmail(),
                     requestDTO.getContent(),
                     requestDTO.getSentAt()
