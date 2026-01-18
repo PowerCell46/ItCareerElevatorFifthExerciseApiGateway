@@ -2,6 +2,7 @@ package com.ItCareerElevatorFifthExercise.listeners;
 
 import com.ItCareerElevatorFifthExercise.DTOs.receiveMessage.HandleReceiveMessageThroughWebSocketDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.ws.WsForwardMessageDTO;
+import com.ItCareerElevatorFifthExercise.services.interfaces.UserService;
 import com.ItCareerElevatorFifthExercise.util.ServerIdentity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ForwardMessageListener {
 
+    private final UserService userService;
     private final ServerIdentity serverIdentity;
     private final SimpMessageSendingOperations messagingTemplate;
 
@@ -28,18 +30,35 @@ public class ForwardMessageListener {
         if (webSocketDTO == null || webSocketDTO.getServerInstanceAddress() == null)
             return;
 
-        if (isReceiverWebSocketConnectionLocatedOnCurrentInstance(webSocketDTO.getServerInstanceAddress())) {
-            log.info("Delivering message through web socket connection with session id: {}.", webSocketDTO.getSessionId());
+        if (!isReceiverWebSocketConnectionLocatedOnCurrentInstance(webSocketDTO.getServerInstanceAddress()))
+            return;
 
-            var payload = new WsForwardMessageDTO(
-                    webSocketDTO.getContent(),
-                    webSocketDTO.getSenderId(),
-                    webSocketDTO.getSenderUsername(),
-                    webSocketDTO.getSentAt()
-            );
+        String receiverUsername = resolveReceiverUsername(webSocketDTO.getReceiverId());
+        if (receiverUsername == null)
+            return;
 
-            messagingTemplate
-                    .convertAndSendToUser(webSocketDTO.getSessionId(), "/topic/messages", payload);
+        log.info("Delivering message to receiver {} via /user/queue/messages.", receiverUsername);
+
+        var payload = new WsForwardMessageDTO(
+                webSocketDTO.getContent(),
+                webSocketDTO.getSenderId(),
+                webSocketDTO.getSenderUsername(),
+                webSocketDTO.getSentAt()
+        );
+
+        messagingTemplate.convertAndSendToUser(receiverUsername, "/queue/messages", payload);
+    }
+
+    private String resolveReceiverUsername(String receiverId) {
+        if (receiverId == null)
+            return null;
+
+        try {
+            return userService.getById(receiverId).getUsername();
+
+        } catch (Exception e) {
+            log.warn("Could not resolve receiverId to username: {}", receiverId, e);
+            return null;
         }
     }
 

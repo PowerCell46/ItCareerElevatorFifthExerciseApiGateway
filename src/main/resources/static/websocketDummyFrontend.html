@@ -54,7 +54,7 @@
             stompClient.connect({}, function (frame) {
                 setConnected(true);
                 console.log('Connected: ' + frame);
-                stompClient.subscribe('/topic/messages', function (messageOutput) {
+                stompClient.subscribe('/user/queue/messages', function (messageOutput) {
                     showMessageOutput(JSON.parse(messageOutput.body));
                 });
             });
@@ -102,12 +102,12 @@
             const response = document.getElementById('response');
             const p = document.createElement('p');
             p.style.wordWrap = 'break-word';
-            p.appendChild(
-                document.createTextNode(
-                    messageOutput.from + ": " +
-                    messageOutput.text + " (" + messageOutput.time + ")"
-                )
-            );
+            const from = messageOutput.senderUsername || messageOutput.from;
+            const text = messageOutput.content || messageOutput.text;
+            const time = messageOutput.sentAt
+                ? new Date(messageOutput.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : (messageOutput.time || '');
+            p.appendChild(document.createTextNode(from + ': ' + text + ' (' + time + ')'));
             response.appendChild(p);
         }
     </script>
