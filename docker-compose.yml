@@ -1,0 +1,87 @@
+services:
+  # PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: api_gateway_db
+    environment:
+      POSTGRES_DB: messaging_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: PowerCell46
+#    ports:  # ! We don't need it unless we want to access the DB from the outside
+#      - "5433:5432"
+    volumes:
+      - api_gateway_vol_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messaging_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Kafka (KRaft mode)
+  kafka:
+    image: apache/kafka:3.7.1
+    container_name: api_gateway_kafka
+    environment:
+      KAFKA_NODE_ID: 0
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+#    ports:  # ! We don't need it unless we want to access Kafka from the outside
+#      - "9092:9092"
+    volumes:
+      - api_gateway_vol_kafka:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # Spring application First instance
+  app_one:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api_gateway_server_first_instance
+    ports:
+      - "8080:8080"
+    environment:
+      # Override the application.properties for container networking
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/messaging_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: PowerCell46
+      KAFKA_FORWARD_MSG_CONSUMER_GROUP: forward-message-consumer-first-instance
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  # Spring application Second instance
+  app_two:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api_gateway_server_second_instance
+    ports:
+      - "8079:8080"
+    environment:
+      # Override the application.properties for container networking
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/messaging_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: PowerCell46
+      KAFKA_FORWARD_MSG_CONSUMER_GROUP: forward-message-consumer-second-instance
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+volumes:
+  api_gateway_vol_db:
+  api_gateway_vol_kafka:

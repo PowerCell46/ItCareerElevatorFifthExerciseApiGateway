@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -40,7 +41,14 @@ public class DatabaseLoader implements CommandLineRunner {
 
             Role roleAdmin = roleRepository
                     .findByName(ROLE_ADMIN_NAME)
-                    .orElse(roleRepository.save(new Role(ROLE_ADMIN_NAME)));
+                    .orElseGet(() -> {
+                        try {
+                            return roleRepository.save(new Role(ROLE_ADMIN_NAME));
+
+                        } catch (DataIntegrityViolationException e) {
+                            return roleRepository.findByName(ROLE_ADMIN_NAME).orElseThrow();
+                        }
+                    });
 
             User adminUser = new User(ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD, Set.of(roleAdmin));
             userRepository.save(adminUser);
@@ -59,14 +67,19 @@ public class DatabaseLoader implements CommandLineRunner {
     }
 
     private void seedRoles() {
-        if (roleRepository.findByName("ROLE_MANAGER").isEmpty()) {
-            roleRepository.save(new Role("ROLE_MANAGER"));
-        }
-        if (roleRepository.findByName("ROLE_MODERATOR").isEmpty()) {
-            roleRepository.save(new Role("ROLE_MODERATOR"));
-        }
-        if (roleRepository.findByName("ROLE_SUPPORT").isEmpty()) {
-            roleRepository.save(new Role("ROLE_SUPPORT"));
+        createRoleIfMissing("ROLE_MANAGER");
+        createRoleIfMissing("ROLE_MODERATOR");
+        createRoleIfMissing("ROLE_SUPPORT");
+    }
+
+    private void createRoleIfMissing(String roleName) {
+        if (roleRepository.findByName(roleName).isEmpty()) {
+            try {
+                roleRepository.save(new Role(roleName));
+
+            } catch (DataIntegrityViolationException e) {
+                log.debug("Role {} already exists (created by another instance).", roleName);
+            }
         }
     }
 }
