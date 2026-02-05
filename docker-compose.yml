@@ -7,7 +7,7 @@ services:
       POSTGRES_DB: messaging_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: PowerCell46
-#    ports:  # ! We don't need it unless we want to access the DB from the outside
+#    ports: # ! We don't need it unless we want to access the DB from the outside
 #      - "5433:5432"
     volumes:
       - api_gateway_vol_db:/var/lib/postgresql/data
@@ -30,7 +30,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_LOG_DIRS: /var/lib/kafka/data
-#    ports:  # ! We don't need it unless we want to access Kafka from the outside
+#    ports: # ! We don't need it unless we want to access Kafka from the outside
 #      - "9092:9092"
     volumes:
       - api_gateway_vol_kafka:/var/lib/kafka/data

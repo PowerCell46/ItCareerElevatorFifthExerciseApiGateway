@@ -2,7 +2,7 @@ FROM eclipse-temurin:21-jdk-alpine AS builder
 
 WORKDIR /app
 
-# Install maven
+# Install Maven
 RUN apk add --no-cache maven
 
 # Copy pom.xml first to cache dependencies
@@ -24,7 +24,6 @@ WORKDIR /app
 # Copy the built JAR from builder stage
 COPY --from=builder /app/target/*.jar app.jar
 
-# TODO: Probably should be dynamic, so we can start more than one instance
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
