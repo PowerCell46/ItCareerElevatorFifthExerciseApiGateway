@@ -2,7 +2,6 @@ package com.ItCareerElevatorFifthExercise.services.implementations;
 
 import com.ItCareerElevatorFifthExercise.DTOs.common.ErrorResponseDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.mail.SendMailMessageDTO;
-import com.ItCareerElevatorFifthExercise.DTOs.message.ConversationSummaryResponseDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.message.MsvcLocationRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.message.MsvcMessageRequestDTO;
 import com.ItCareerElevatorFifthExercise.DTOs.receiveMessage.HandleReceiveMessageThroughEmailRequestDTO;
@@ -25,7 +24,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
-import java.util.List;
 
 @Slf4j
 @Service
