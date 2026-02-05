@@ -1,0 +1,194 @@
+services:
+  kafka:
+    image: apache/kafka:3.7.1
+    container_name: kafka_message_broker
+    environment:
+      KAFKA_NODE_ID: 0
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      # CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    ports:
+      - "9092:9092"
+    volumes:
+      - messenger_application_kafka_vol:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  postgres_api_gateway:
+    image: postgres:16-alpine
+    container_name: api_gateway_db
+    environment:
+      POSTGRES_DB: messaging_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: PowerCell46
+    volumes:
+      - messenger_application_api_gateway_db_vol:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messaging_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres_persist_message:
+    image: postgres:16-alpine
+    container_name: persist_message_db
+    environment:
+      POSTGRES_DB: messages
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: PowerCell46
+    volumes:
+      - messenger_application_persist_message_db_vol:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messages"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres_user_location:
+    image: postgres:16-alpine
+    container_name: user_location_db
+    environment:
+      POSTGRES_DB: messaging_geospatial_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: PowerCell46
+    volumes:
+      - messenger_application_user_location_db_vol:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messaging_geospatial_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongo_db_user_presence:
+    image: mongo:7-jammy
+    container_name: user_presence_db
+    environment:
+      MONGO_INITDB_DATABASE: presence_db
+    volumes:
+      - messenger_application_user_presence_db_vol:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  server_api_gateway:
+    build:
+      context: ./ItCareerElevatorFifthExerciseApiGateway
+      dockerfile: Dockerfile
+    container_name: api_gateway_server
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_api_gateway:5432/messaging_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: PowerCell46
+      KAFKA_FORWARD_MSG_CONSUMER_GROUP: forward-message-consumer-first-instance
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      postgres_api_gateway:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  server_message:
+    build:
+      context: ./ItCareerElevatorFifthExerciseMessagingMicroservice
+      dockerfile: Dockerfile
+    container_name: message_server
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  server_persist_message:
+    build:
+      context: ./ItCareerElevatorFifthExerciseMessagePersistenceMicroservice
+      dockerfile: Dockerfile
+    container_name: message_persistence_server
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_persist_message:5432/messages
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: PowerCell46
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_GROUP_ID: persist-message-consumer
+      SNOWFLAKE_WORKER_ID: 5
+      SNOWFLAKE_DATACENTER_ID: 4
+    depends_on:
+      postgres_persist_message:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  server_user_location:
+    build:
+      context: ./ItCareerElevatorFifthExerciseUserLocationMicroservice
+      dockerfile: Dockerfile
+    container_name: user_location_server
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_user_location:5432/messaging_geospatial_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: PowerCell46
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_GROUP_ID: user-location-consumer
+    depends_on:
+      postgres_user_location:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  server_user_presence:
+    build:
+      context: ./ItCareerElevatorFifthExercisePresenceMicroservice
+      dockerfile: Dockerfile
+    container_name: user_presence_server
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongo_db_user_presence:27017/presence_db
+    depends_on:
+      mongo_db_user_presence:
+        condition: service_healthy
+
+  server_mail_notification:
+    build:
+      context: ./ItCareerElevatorFifthExerciseMailMicroservice
+      dockerfile: Dockerfile
+    container_name: mail_notification_server
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_EMAIL_MESSAGE_GROUP_ID: send-email-message-consumer
+      KAFKA_REGISTER_EMAIL_GROUP_ID: send-registration-email-consumer
+      SPRING_MAIL_EMAIL: makotsevo.fan@gmail.com
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+volumes:
+  messenger_application_kafka_vol:
+  messenger_application_api_gateway_db_vol:
+  messenger_application_persist_message_db_vol:
+  messenger_application_user_location_db_vol:
+  messenger_application_user_presence_db_vol:
